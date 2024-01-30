@@ -1,0 +1,18 @@
+server:
+  port: 8989
+
+# flyway:
+#   baseline-on-migrate: true
+#   url: jdbc:mysql://localhost:6603/mysql
+#   schemas: ra
+#   user: "root"
+#   password: "root"
+
+spring:
+  flyway:
+    baselineOnMigrate: true
+  datasource:
+    url: jdbc:mysql://${DOCKER_HOST_IP:localhost}:6603/ra
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
