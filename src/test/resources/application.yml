@@ -1,0 +1,13 @@
+server:
+  port: 8989
+
+spring:
+  jpa:
+    show-sql: true
+  flyway:
+    baselineOnMigrate: true
+  datasource:
+    url: jdbc:mysql://${DOCKER_HOST_IP:localhost}:6603/ra
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver

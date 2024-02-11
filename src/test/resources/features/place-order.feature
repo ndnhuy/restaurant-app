@@ -3,6 +3,7 @@ Feature: Place Order
   I should be able to place an order
 
   Scenario: Order is created
-    When I place an order
-    Then the order should be created
-    And the order should have status init
+    Given A valid Customer
+    Given A restaurant has menu of Chicken with amount of 10 USD each
+    When I place an order for a Chicken
+    Then the order should be created and have status INIT

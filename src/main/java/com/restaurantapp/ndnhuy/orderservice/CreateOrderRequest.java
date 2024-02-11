@@ -1,5 +1,6 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,4 +13,12 @@ import lombok.NoArgsConstructor;
 public class CreateOrderRequest {
 
   long customerId;
+  private List<LineItem> lineItems;
+
+  @Getter
+  public static class LineItem {
+
+    private String menuItemId;
+    private int quantity;
+  }
 }
