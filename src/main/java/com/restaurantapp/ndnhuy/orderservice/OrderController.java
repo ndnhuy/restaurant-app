@@ -29,18 +29,16 @@ public class OrderController {
   @GetMapping(path = "/{orderId}")
   public ResponseEntity<GetOrderResponse> getOrder(@PathVariable long orderId) {
     return orderService
-      .findOrder(orderId)
-      .map(order ->
-        new ResponseEntity<>(newGetOrderResponse(order), HttpStatus.OK)
-      )
-      .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        .findOrder(orderId)
+        .map(order -> new ResponseEntity<>(newGetOrderResponse(order), HttpStatus.OK))
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   private GetOrderResponse newGetOrderResponse(Order order) {
     return GetOrderResponse
-      .builder()
-      .orderId(order.getId())
-      .status(order.getStatus())
-      .build();
+        .builder()
+        .orderId(order.getId())
+        .status(order.getStatus())
+        .build();
   }
 }

@@ -16,3 +16,20 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: false
+
+logging:
+  level:
+    # root: DEBUG
+    # org.springframework.web: DEBUG
+    org:
+      hibernate:
+        DEBUG
+        # sql: debug
+        # type:
+        #   descriptor:
+        #     sql: TRACE

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -80,7 +82,6 @@ public class RestaurantComponentTestStepDefs {
         .body(
           CreateRestaurantRequest
             .builder()
-            .
             .build()
         )
         .when()
