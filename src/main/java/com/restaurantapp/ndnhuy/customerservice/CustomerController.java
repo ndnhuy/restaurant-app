@@ -1,5 +1,6 @@
 package com.restaurantapp.ndnhuy.customerservice;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,35 +17,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/customers")
 public class CustomerController {
 
-  private CustomerService customerService;
+    private CustomerService customerService;
 
-  @GetMapping(path = "/{customerId}")
-  public ResponseEntity<GetCustomerResponse> getCustomer(
-    @PathVariable long customerId
-  ) {
-    return customerService
-      .getCustomer(customerId)
-      .map(c ->
-        ResponseEntity.ok(
-          GetCustomerResponse
-            .builder()
-            .customerId(c.getId())
-            .firtName(c.getFirstName())
-            .lastName(c.getLastName())
-            .build()
-        )
-      )
-      .orElse(ResponseEntity.notFound().build());
-  }
+    @GetMapping(path = "/{customerId}")
+    public ResponseEntity<GetCustomerResponse> getCustomer(
+            @PathVariable long customerId
+    ) {
+        return customerService
+                .getCustomer(customerId)
+                .map(c ->
+                        ResponseEntity.ok(
+                                GetCustomerResponse
+                                        .builder()
+                                        .customerId(c.getId())
+                                        .firtName(c.getFirstName())
+                                        .lastName(c.getLastName())
+                                        .build()
+                        )
+                )
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-  @PostMapping
-  public CreateCustomerResponse createCustomer(
-    @RequestBody CreateCustomerRequest req
-  ) {
-    var cust = customerService.createCustomer(
-      req.getFirstName(),
-      req.getLastName()
-    );
-    return CreateCustomerResponse.builder().customerId(cust.getId()).build();
-  }
+    @PostMapping
+    public CreateCustomerResponse createCustomer(
+            @RequestBody @Valid CreateCustomerRequest req
+    ) {
+        var cust = customerService.createCustomer(req);
+        return CreateCustomerResponse.builder().customerId(cust.getId()).build();
+    }
 }

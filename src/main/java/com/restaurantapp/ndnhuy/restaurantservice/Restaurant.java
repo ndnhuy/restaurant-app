@@ -1,20 +1,6 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 @Entity
 @Table(name = "ra_restaurant")
@@ -42,14 +29,14 @@ public class Restaurant {
   @NotBlank(message = "name must not be empty")
   private String name;
 
-  // @Embedded
-  // @ElementCollection(fetch = FetchType.LAZY)
-  // @CollectionTable(
-  //   name = "ra_restaurant_menu_items",
-  //   // if not specify this, default joinColumn would be concatenation of entity name and "_" and primary column
-  //   joinColumns = { @JoinColumn(name = "restaurant_id") }
-  // )
-  @OneToMany(fetch = FetchType.LAZY)
+//   @Embedded
+//   @ElementCollection(fetch = FetchType.EAGER)
+//   @CollectionTable(
+//     name = "ra_restaurant_menu_items",
+//     // if not specify this, default joinColumn would be concatenation of entity name and "_" and primary column
+//     joinColumns = { @JoinColumn(name = "restaurant_id") }
+//   )
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(name = "restaurant_id")
   @NotEmpty(message = "menu items must be provided")
   private List<MenuItem> menuItems;
