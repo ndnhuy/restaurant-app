@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class GetCustomerResponse {
 
   private long customerId;
-  private String firtName;
+  private String firstName;
   private String lastName;
 }

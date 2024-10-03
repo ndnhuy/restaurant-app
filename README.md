@@ -16,3 +16,8 @@ mvn spring-boot:run
 ```
 mvn clean flyway:migrate -Dflyway.configFiles=flyway.conf
 ```
+
+- Docker build
+```declarative
+docker build -t ra-service-k8s:1.0 -f Dockerfile_k8s .
+```

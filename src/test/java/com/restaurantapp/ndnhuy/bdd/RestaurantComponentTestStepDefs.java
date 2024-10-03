@@ -9,15 +9,25 @@ import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 
+import com.restaurantapp.ndnhuy.restaurantservice.Restaurant;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.response.Response;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.event.EventListener;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @CucumberContextConfiguration
@@ -26,15 +36,15 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles({"default", "localdb"})
 public class RestaurantComponentTestStepDefs {
 
-    private static String CONTENT_TYPE = "application/json";
+    private static final String CONTENT_TYPE = "application/json";
 
-    private static long TEST_CUSTOMER_ID = 1L;
-    private static long TEST_RESTAURANT_ID = 1L;
+    private static final long TEST_CUSTOMER_ID = 1L;
+    private static final long TEST_RESTAURANT_ID = 1L;
 
     @LocalServerPort
     private int port;
 
-    private String host = "localhost";
+    private final String host = "localhost";
 
     private Response response;
 
@@ -86,10 +96,18 @@ public class RestaurantComponentTestStepDefs {
                     .body(
                             CreateRestaurantRequest
                                     .builder()
+                                    .name("Chicken Restaurant")
+                                    .menuItems(List.of(
+                                            Restaurant.MenuItem
+                                                    .builder()
+                                                    .name("chicken 1")
+                                                    .price(new BigDecimal(10))
+                                                    .build()
+                                    ))
                                     .build()
                     )
                     .when()
-                    .post(baseUrl("/customers"))
+                    .post(baseUrl("/restaurants"))
                     .then()
                     .statusCode(200);
         }
@@ -100,7 +118,15 @@ public class RestaurantComponentTestStepDefs {
         this.response =
                 given()
                         .contentType(CONTENT_TYPE)
-                        .body(CreateOrderRequest.builder().customerId(1).build())
+                        .body(CreateOrderRequest.builder()
+                                .customerId(1)
+                                .lineItems(List.of(
+                                        CreateOrderRequest.LineItem.builder()
+                                                .menuItemId(1L)
+                                                .quantity(1)
+                                                .build()
+                                ))
+                                .build())
                         .when()
                         .post(baseUrl("/orders"));
     }

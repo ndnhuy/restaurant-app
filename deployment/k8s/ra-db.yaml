@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ra-db
+spec:
+  type: NodePort
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: ra-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ra-db
+  labels:
+    app: ra-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ra-db
+  template:
+    metadata:
+      labels:
+        app: ra-db
+    spec:
+      containers:
+        - name: ra-db
+          image: mysql:8.0.31
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: ra

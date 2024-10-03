@@ -13,5 +13,9 @@ import lombok.Setter;
 @Builder
 public class CreateCustomerResponse {
 
-  long customerId;
+    private Long customerId;
+
+    private String firstName;
+
+    private String lastName;
 }

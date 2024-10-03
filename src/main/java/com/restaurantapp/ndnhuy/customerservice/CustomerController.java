@@ -2,8 +2,7 @@ package com.restaurantapp.ndnhuy.customerservice;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping(path = "/customers")
+@Slf4j
 public class CustomerController {
 
     private CustomerService customerService;
@@ -30,7 +30,7 @@ public class CustomerController {
                                 GetCustomerResponse
                                         .builder()
                                         .customerId(c.getId())
-                                        .firtName(c.getFirstName())
+                                        .firstName(c.getFirstName())
                                         .lastName(c.getLastName())
                                         .build()
                         )
@@ -43,6 +43,10 @@ public class CustomerController {
             @RequestBody @Valid CreateCustomerRequest req
     ) {
         var cust = customerService.createCustomer(req);
-        return CreateCustomerResponse.builder().customerId(cust.getId()).build();
+        return CreateCustomerResponse.builder()
+                .customerId(cust.getId())
+                .firstName(cust.getFirstName())
+                .lastName(cust.getLastName())
+                .build();
     }
 }

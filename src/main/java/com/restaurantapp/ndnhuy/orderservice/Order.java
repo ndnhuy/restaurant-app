@@ -1,14 +1,12 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.restaurantapp.ndnhuy.restaurantservice.Restaurant;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "ra_order")
@@ -16,12 +14,12 @@ import lombok.Setter;
 @Setter
 public class Order {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private Long customerId;
+    private Long customerId;
 
-  @Enumerated(EnumType.STRING)
-  private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 }

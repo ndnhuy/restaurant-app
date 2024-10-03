@@ -16,9 +16,10 @@ public class CreateOrderRequest {
   private List<LineItem> lineItems;
 
   @Getter
+  @Builder
   public static class LineItem {
 
-    private String menuItemId;
+    private Long menuItemId;
     private int quantity;
   }
 }
