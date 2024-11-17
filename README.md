@@ -18,6 +18,25 @@ mvn clean flyway:migrate -Dflyway.configFiles=flyway.conf
 ```
 
 - Docker build
-```declarative
+```
+eval $(minikube -p minikube docker-env)
 docker build -t ra-service-k8s:1.0 -f Dockerfile_k8s .
+```
+
+- api
+```
+curl -H 'Content-Type: application/json' \
+    -d '{"customerId": 1, "lineItems":[{"menuItemId": 1, "quantity": 1}]}' \
+    -X POST \
+    http://localhost:8989/orders
+    
+curl -H 'Content-Type: application/json' \
+    -X POST \
+    http://localhost:8989/orders/create/INIT
+
+```
+- vegeta
+```
+echo "POST http://localhost:8989/orders/create/INIT" | vegeta attack -rate=5 -duration=3s | tee results.bin | vegeta report
+
 ```

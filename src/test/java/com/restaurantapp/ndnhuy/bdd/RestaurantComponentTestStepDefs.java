@@ -49,6 +49,7 @@ public class RestaurantComponentTestStepDefs {
     private Response response;
 
     private String baseUrl(String path) {
+//        return String.format("http://%s:%s%s", "192.168.103.2", 30232, path);
         return String.format("http://%s:%s%s", host, port, path);
     }
 

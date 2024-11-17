@@ -1,0 +1,3 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${DOCKER_HOST_IP:ra-db}:3306/ra
