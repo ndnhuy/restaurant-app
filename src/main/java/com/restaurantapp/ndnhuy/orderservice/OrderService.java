@@ -1,23 +1,28 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class OrderService {
 
     private OrderRepository orderRepository;
 
     private MeterRegistry meterRegistry;
+
+    @Value("${test.sleep-in-ms}")
+    private Long sleepInMs;
+
+    @Value("${test.process-in-ms}")
+    private Long processInMs;
 
     public OrderService(OrderRepository orderRepository, MeterRegistry meterRegistry) {
         this.orderRepository = orderRepository;
@@ -46,20 +51,29 @@ public class OrderService {
         return order;
     }
 
-    @Transactional
-    public Order testCreateOrder(OrderStatus status) {
-        var order = new Order();
-        order.setStatus(status);
-        order.setCustomerId(ThreadLocalRandom.current().nextLong(0, Long.MAX_VALUE));
-        orderRepository.save(order);
-
+    @SneakyThrows
+    public void testCreateOrder(OrderStatus status, long waitTimeInMs, long processTimeInMs) {
+        log.info("start - cores: {}",  Runtime.getRuntime().availableProcessors());
+        Thread.sleep(waitTimeInMs);
+        busyInMs(processTimeInMs);
         var counter = Counter.builder("api_order_create")
-                .tag("status", order.getStatus().toString())
+                .tag("status", status.toString())
                 .description("order status")
                 .register(meterRegistry);
         counter.increment();
+    }
 
-        return order;
+    private void busyInMs(long ms) {
+        long endTime = System.currentTimeMillis() + ms;
+        var cnt = 0.0;
+        while (System.currentTimeMillis() < endTime) {
+            cnt += Math.sqrt(Math.random());
+        }
+        // trick jvm to not  optimize away the busy loop
+        blackhole(cnt);
+    }
+
+    private void blackhole(double d) {
     }
 
     public Optional<Order> confirmOrder(long orderId, OrderStatus status) {

@@ -9,13 +9,18 @@ services:
     ports:
       - "8989:8989"
       - "9192:9192"
+    environment:
+      - TEST_SLEEPINMS=2000
+      - TEST_PROCESSINMS=1000
     depends_on:
       - mysql
     restart: unless-stopped
+#    cpus: "0"
+    cpuset: "0"
 #    deploy:
 #      resources:
 #        limits:
-#          cpus: "2"
+#          cpus: "1"
 #          memory: 500M
 
   ##Database config

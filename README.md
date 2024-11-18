@@ -1,6 +1,13 @@
 # restaurant-app
 Restaurant saas toy
 
+- Run app with docker-compose
+```
+docker stop ra-service
+docker rm ra-service
+docker-compose up -d --build
+```
+
 - Run the app
 ```
 mvn spring-boot:run
