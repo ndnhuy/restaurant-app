@@ -15,7 +15,6 @@ services:
     depends_on:
       - mysql
     restart: unless-stopped
-#    cpus: "0"
     cpuset: "0"
 #    deploy:
 #      resources:

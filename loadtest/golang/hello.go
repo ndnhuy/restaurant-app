@@ -9,7 +9,7 @@ import (
 	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
-const RPS = 10;
+const RPS = 1;
 const WAIT_TIME_IN_MS = 0; 
 const PROCESS_TIME_IN_MS = 2000;
 

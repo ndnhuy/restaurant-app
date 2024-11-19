@@ -38,7 +38,7 @@ public class RestaurantControllerTest {
     @SneakyThrows
     public void testGrafana() {
         this.mockMvc.perform(
-                post("/orders/create/INIT?waitTimeInMs=0&processTimeInMs=1000")
+                post("/orders/create/INIT?waitTimeInMs=0&processTimeInMs=2000")
                         .contentType("application/json"));
     }
 

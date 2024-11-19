@@ -18,12 +18,6 @@ public class OrderService {
 
     private MeterRegistry meterRegistry;
 
-    @Value("${test.sleep-in-ms}")
-    private Long sleepInMs;
-
-    @Value("${test.process-in-ms}")
-    private Long processInMs;
-
     public OrderService(OrderRepository orderRepository, MeterRegistry meterRegistry) {
         this.orderRepository = orderRepository;
         this.meterRegistry = meterRegistry;
@@ -53,7 +47,7 @@ public class OrderService {
 
     @SneakyThrows
     public void testCreateOrder(OrderStatus status, long waitTimeInMs, long processTimeInMs) {
-        log.info("start - cores: {}",  Runtime.getRuntime().availableProcessors());
+        log.info("start - cores: {}", Runtime.getRuntime().availableProcessors());
         Thread.sleep(waitTimeInMs);
         busyInMs(processTimeInMs);
         var counter = Counter.builder("api_order_create")
@@ -63,10 +57,12 @@ public class OrderService {
         counter.increment();
     }
 
-    private void busyInMs(long ms) {
-        long endTime = System.currentTimeMillis() + ms;
+    private void busyInMs(long busyTimeInMs) {
         var cnt = 0.0;
-        while (System.currentTimeMillis() < endTime) {
+        // a magic number 60000 to make sure CPU takes as long as <busyTimInMs> to complete the task
+        // for example: if busyTimeInMs=1000, busyTimeInMs*60000 will make sure it process to approximately 1000ms
+        // this magic number may vary depending on the machine
+        for (var i = 0; i < busyTimeInMs * 60000; i++) {
             cnt += Math.sqrt(Math.random());
         }
         // trick jvm to not  optimize away the busy loop
