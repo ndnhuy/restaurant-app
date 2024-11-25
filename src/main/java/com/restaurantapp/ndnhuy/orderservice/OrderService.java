@@ -6,9 +6,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -26,17 +24,16 @@ public class OrderService {
 //                .register(meterRegistry);
     }
 
-    @Transactional
     public Order createOrder(long customerId) {
         if (customerId == 0) {
             throw new IllegalArgumentException("invalid customer id");
         }
         var order = new Order();
-        order.setStatus(OrderStatus.INIT);
+        order.setStatus(OrderStatus.CREATED);
         order.setCustomerId(customerId);
         orderRepository.save(order);
 
-        var counter = Counter.builder("api_order_create")
+        var counter = Counter.builder("api_order_created")
                 .tag("status", order.getStatus().toString())
                 .description("order status")
                 .register(meterRegistry);
@@ -45,6 +42,7 @@ public class OrderService {
         return order;
     }
 
+    // this is dummy method used for testing grafana only
     @SneakyThrows
     public void testCreateOrder(OrderStatus status, long waitTimeInMs, long processTimeInMs) {
         log.info("start - cores: {}", Runtime.getRuntime().availableProcessors());

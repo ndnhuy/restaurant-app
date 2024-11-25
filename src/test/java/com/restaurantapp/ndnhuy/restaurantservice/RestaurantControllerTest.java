@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restaurantapp.ndnhuy.example.ServiceLayer;
+import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.restaurantservice.Restaurant.MenuItem;
 
 import java.math.BigDecimal;
@@ -18,11 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@Import( { TestcontainersConfiguration.class })
+@ActiveProfiles("test")
 public class RestaurantControllerTest {
 
     @Autowired
@@ -38,7 +42,7 @@ public class RestaurantControllerTest {
     @SneakyThrows
     public void testGrafana() {
         this.mockMvc.perform(
-                post("/orders/create/INIT?waitTimeInMs=0&processTimeInMs=2000")
+                post("/orders/create/INIT?waitTimeInMs=0&processTimeInMs=100")
                         .contentType("application/json"));
     }
 

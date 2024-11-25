@@ -43,7 +43,6 @@ public class Restaurant {
 
   @Entity
   @Table(name = "ra_restaurant_menu_items")
-  @Embeddable
   @Access(AccessType.FIELD)
   @Getter
   @Builder

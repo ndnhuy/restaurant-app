@@ -9,13 +9,13 @@ import (
 	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
-const RPS = 1;
+const RPS = 10;
 const WAIT_TIME_IN_MS = 0; 
-const PROCESS_TIME_IN_MS = 2000;
+const PROCESS_TIME_IN_MS = 0;
 
 func main() {
 	rate := vegeta.Rate{Freq: RPS, Per: time.Second}
-	duration := 10 * time.Second
+	duration := 120 * time.Second
 	urlBuild := func(baseUrl string, status string, waitTimeMs uint64, processTimeMs uint64) string {
 		return fmt.Sprintf("%s/%s?waitTimeInMs=%d&processTimeInMs=%d", baseUrl, status, waitTimeMs, processTimeMs)
 	}

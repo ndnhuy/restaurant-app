@@ -27,6 +27,7 @@ public class OrderController {
         return CreateOrderResponse.builder().orderId(order.getId()).build();
     }
 
+    // this is dummy api used for testing grafana only
     @PostMapping("/create/{status}")
     @SneakyThrows
     public CreateOrderResponse testCreateOrder(@PathVariable OrderStatus status, @RequestParam Long waitTimeInMs, @RequestParam Long processTimeInMs) {

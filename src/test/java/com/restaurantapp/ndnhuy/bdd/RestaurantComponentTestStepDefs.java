@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
@@ -15,15 +16,10 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.response.Response;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.BeforeAll;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -31,9 +27,8 @@ import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @CucumberContextConfiguration
-// localdb will configure the test to run with local mysql
-// default is to run with h2
-@ActiveProfiles({"default", "localdb"})
+@Import( { TestcontainersConfiguration.class })
+@ActiveProfiles({"default", "test", "testcontainers"})
 public class RestaurantComponentTestStepDefs {
 
     private static final String CONTENT_TYPE = "application/json";
@@ -49,7 +44,6 @@ public class RestaurantComponentTestStepDefs {
     private Response response;
 
     private String baseUrl(String path) {
-//        return String.format("http://%s:%s%s", "192.168.103.2", 30232, path);
         return String.format("http://%s:%s%s", host, port, path);
     }
 

@@ -15,12 +15,11 @@ services:
     depends_on:
       - mysql
     restart: unless-stopped
-    cpuset: "0"
+#    cpuset: "0"
 #    deploy:
 #      resources:
 #        limits:
 #          cpus: "1"
-#          memory: 500M
 
   ##Database config
   mysql:

@@ -1,6 +1,3 @@
-spring:
-  datasource:
-    url: jdbc:mysql://${DOCKER_HOST_IP:localhost}:6603/ra
-    username: root
-    password: root
-    driver-class-name: com.mysql.jdbc.Driver
+app:
+  testcontainers:
+    enabled: true # if false, tests will run using h2

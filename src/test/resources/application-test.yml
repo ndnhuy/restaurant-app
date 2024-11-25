@@ -1,6 +1,10 @@
 server:
   port: 8989
 
+app:
+  testcontainers:
+    enabled: true # if false, tests will run using h2
+
 spring:
   flyway:
     baselineOnMigrate: true
@@ -21,4 +25,4 @@ logging:
         # sql: debug
         # type:
         #   descriptor:
-        #     sql: TRACE
+      #     sql: TRACE
