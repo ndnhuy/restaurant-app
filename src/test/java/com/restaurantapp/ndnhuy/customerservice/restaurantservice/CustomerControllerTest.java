@@ -10,6 +10,8 @@ import com.restaurantapp.ndnhuy.restaurantservice.Restaurant.MenuItem;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantService;
 import lombok.SneakyThrows;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,7 +48,7 @@ public class CustomerControllerTest {
     @Test
     @SneakyThrows
     public void testCreateCustomer_shouldSuccess() {
-        this.mockMvc.perform(
+        var resp = this.mockMvc.perform(
                         post("/customers")
                                 .contentType("application/json")
                                 .content(
@@ -58,11 +60,14 @@ public class CustomerControllerTest {
                                                         .build())))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("customerId").value(1L))
+                .andExpect(jsonPath("customerId").isNotEmpty())
                 .andExpect(jsonPath("firstName").value("John"))
-                .andExpect(jsonPath("lastName").value("Wick"));
+                .andExpect(jsonPath("lastName").value("Wick"))
+                .andReturn();
+       var json = new JSONObject(resp.getResponse().getContentAsString());
+       var customerId = json.getLong("customerId");
 
-        assertCustomerIsPersisted(1L, "John", "Wick");
+        assertCustomerIsPersisted(customerId, "John", "Wick");
     }
 
     @Test
@@ -86,7 +91,7 @@ public class CustomerControllerTest {
         var obj = customerRepository.findById(id);
         assertThat(obj.isPresent()).isTrue();
         var r = obj.get();
-        assertThat(r.getId()).isEqualTo(1);
+        assertThat(r.getId()).isEqualTo(id);
         assertThat(r.getFirstName()).isEqualTo(firstName);
         assertThat(r.getLastName()).isEqualTo(lastName);
     }

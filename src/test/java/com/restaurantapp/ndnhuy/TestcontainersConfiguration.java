@@ -19,7 +19,7 @@ public class TestcontainersConfiguration {
     @ConditionalOnProperty(name = "app.testcontainers.enabled", havingValue = "true")
     @ServiceConnection
     public MySQLContainer<?> mysqlContainer() {
-        return new MySQLContainer<>("mysql:8.0.31");
+        return new MySQLContainer<>("mysql:8.0.31").withReuse(true);
     }
 
 }

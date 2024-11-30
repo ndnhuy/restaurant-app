@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.SneakyThrows;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import( { TestcontainersConfiguration.class })
+@Import({TestcontainersConfiguration.class})
 @ActiveProfiles("test")
 public class RestaurantControllerTest {
 
@@ -61,7 +62,7 @@ public class RestaurantControllerTest {
                         .name("pizza type 2")
                         .price(new BigDecimal(10))
                         .build());
-        this.mockMvc.perform(
+        var resp = this.mockMvc.perform(
                         post("/restaurants")
                                 .contentType("application/json")
                                 .content(
@@ -73,9 +74,13 @@ public class RestaurantControllerTest {
                                                         .build())))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("restaurantId").value(1L));
+                .andExpect(jsonPath("restaurantId").isNotEmpty())
+                .andReturn();
 
-        assertRestaurantIsPersisted(1L, restaurantName, menuItems);
+        var json = new JSONObject(resp.getResponse().getContentAsString());
+        var rid = json.getLong("customerId");
+
+        assertRestaurantIsPersisted(rid, restaurantName, menuItems);
     }
 
     @Transactional

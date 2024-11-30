@@ -47,3 +47,6 @@ curl -H 'Content-Type: application/json' \
 echo "POST http://localhost:8989/orders/create/INIT" | vegeta attack -rate=5 -duration=3s | tee results.bin | vegeta report
 
 ```
+
+## Test Containers
+- enable testcontainer reuse by adding `app.testcontainers.enabled=true` to ~/.testcontainers.properties
