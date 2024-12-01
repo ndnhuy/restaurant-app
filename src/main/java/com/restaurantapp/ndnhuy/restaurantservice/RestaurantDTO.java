@@ -45,6 +45,8 @@ public class RestaurantDTO {
   @NoArgsConstructor
   public static class MenuItemDTO {
 
+    private Long id;
+
     @NotBlank
     private String name;
 

@@ -15,6 +15,8 @@ public enum OrderStatus {
   READY_TO_PICK,
   // driver picked up
   PICKED_UP,
+  // driver is delivering the order
+  DELIVERING,
   // driver delivered the order
   DELIVERED;
 }

@@ -22,47 +22,48 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/restaurants")
 public class RestaurantController {
 
-  private RestaurantService service;
+    private RestaurantService service;
 
-  @PostMapping
-  public CreateRestaurantResponse createRestaurant(
-      @Valid @RequestBody CreateRestaurantRequest req) {
-    var r = service.createRestaurant(req.getName(), req.getMenuItems());
-    return CreateRestaurantResponse.builder().restaurantId(r.getId()).build();
-  }
+    @PostMapping
+    public CreateRestaurantResponse createRestaurant(
+            @Valid @RequestBody CreateRestaurantRequest req) {
+        var r = service.createRestaurant(req.getName(), req.getMenuItems());
+        return CreateRestaurantResponse.builder().id(r.getId()).build();
+    }
 
-  @GetMapping(path = "/{id}")
-  public ResponseEntity<GetRestaurantResponse> getRestaurant(@PathVariable long id) {
-    return service
-        .getRestaurantById(id)
-        .map(e -> GetRestaurantResponse
-            .builder()
-            .id(e.getId())
-            .name(e.getName())
-            .menuItems(
-                e
-                    .getMenuItems()
-                    .stream()
-                    .map(it -> MenuItemDTO
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<GetRestaurantResponse> getRestaurant(@PathVariable long id) {
+        return service
+                .getRestaurantById(id)
+                .map(e -> GetRestaurantResponse
                         .builder()
-                        .name(it.getName())
-                        .price(it.getPrice())
+                        .id(e.getId())
+                        .name(e.getName())
+                        .menuItems(
+                                e
+                                        .getMenuItems()
+                                        .stream()
+                                        .map(it -> MenuItemDTO
+                                                .builder()
+                                                .id(it.getId())
+                                                .name(it.getName())
+                                                .price(it.getPrice())
+                                                .build())
+                                        .toList())
                         .build())
-                    .toList())
-            .build())
-        .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
-        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    // return service
-    // .getRestaurantById(id)
-    // .map(r ->
-    // GetRestaurantResponse
-    // .builder()
-    // .id(r.getId())
-    // .name(r.getName())
-    // .menuItems(r.getMenuItems())
-    // .build()
-    // )
-    // .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
-    // .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-  }
+                .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        // return service
+        // .getRestaurantById(id)
+        // .map(r ->
+        // GetRestaurantResponse
+        // .builder()
+        // .id(r.getId())
+        // .name(r.getName())
+        // .menuItems(r.getMenuItems())
+        // .build()
+        // )
+        // .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
+        // .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
 }

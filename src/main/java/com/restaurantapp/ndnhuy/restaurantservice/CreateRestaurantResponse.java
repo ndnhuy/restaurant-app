@@ -12,5 +12,5 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CreateRestaurantResponse {
-  private long restaurantId;
+  private long id;
 }

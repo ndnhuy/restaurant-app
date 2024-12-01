@@ -2,6 +2,7 @@ package com.restaurantapp.ndnhuy.restaurantservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,11 +75,23 @@ public class RestaurantControllerTest {
                                                         .build())))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("restaurantId").isNotEmpty())
+                .andExpect(jsonPath("id").isNotEmpty())
                 .andReturn();
 
         var json = new JSONObject(resp.getResponse().getContentAsString());
-        var rid = json.getLong("customerId");
+        var rid = json.getLong("id");
+
+        this.mockMvc.perform(
+                        get("/restaurants/" + rid))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(rid))
+                .andExpect(jsonPath("name").value(restaurantName))
+                .andExpect(jsonPath("menuItems").hasJsonPath())
+                .andExpect(jsonPath("menuItems[0].name").value(menuItems.getFirst().getName()))
+                .andExpect(jsonPath("menuItems[0].price").value(menuItems.getFirst().getPrice().setScale(1).toString()))
+                .andExpect(jsonPath("menuItems[1].name").value(menuItems.get(1).getName()))
+                .andExpect(jsonPath("menuItems[1].price").value(menuItems.get(1).getPrice().setScale(1).toString()));
 
         assertRestaurantIsPersisted(rid, restaurantName, menuItems);
     }
@@ -88,7 +101,7 @@ public class RestaurantControllerTest {
         var obj = restaurantRepository.findById(id);
         assertThat(obj.isPresent()).isTrue();
         var r = obj.get();
-        assertThat(r.getId()).isEqualTo(1);
+        assertThat(r.getId()).isEqualTo(id);
         assertThat(r.getName()).isEqualTo(restaurantName);
         assertThat(r.getMenuItems()).hasSize(2);
         var actualMenuItem1 = r.getMenuItems().get(0);
