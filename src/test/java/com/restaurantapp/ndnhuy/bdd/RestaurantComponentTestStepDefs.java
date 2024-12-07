@@ -18,7 +18,6 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.http.HttpStatus;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -26,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @CucumberContextConfiguration
@@ -34,6 +34,8 @@ import java.util.List;
 public class RestaurantComponentTestStepDefs {
 
     private static final String CONTENT_TYPE = "application/json";
+
+    private final String SCENARIO_ID = UUID.randomUUID().toString();
 
     private final TestData testData = new TestData();
 
@@ -65,8 +67,8 @@ public class RestaurantComponentTestStepDefs {
                 .body(
                         CreateCustomerRequest
                                 .builder()
-                                .firstName("Huy")
-                                .lastName("Nguyen")
+                                .firstName("Huy " + SCENARIO_ID)
+                                .lastName("Nguyen " + SCENARIO_ID)
                                 .build()
                 )
                 .when()
@@ -78,8 +80,8 @@ public class RestaurantComponentTestStepDefs {
         testData.setCustomerId(customerId);
     }
 
-    @Given("^A restaurant has menu of Chicken with amount of 10 USD each$")
-    public void givenARestaurantWithMenus() {
+    @Given("A restaurant has menu of Chicken with amount of {double} USD each")
+    public void givenARestaurantWithMenus(double itemPrice) {
         // create restaurant
         var restId = given()
                 .when()
@@ -87,12 +89,12 @@ public class RestaurantComponentTestStepDefs {
                 .body(
                         CreateRestaurantRequest
                                 .builder()
-                                .name("Chicken Restaurant")
+                                .name("Chicken Restaurant " + SCENARIO_ID)
                                 .menuItems(List.of(
                                         Restaurant.MenuItem
                                                 .builder()
-                                                .name("chicken 1")
-                                                .price(new BigDecimal(10))
+                                                .name("chicken 1 " + SCENARIO_ID)
+                                                .price(new BigDecimal(itemPrice))
                                                 .build()
                                 ))
                                 .build()
@@ -136,7 +138,7 @@ public class RestaurantComponentTestStepDefs {
                         .post(baseUrl("/orders"));
     }
 
-    @Then("^the order should be created and have status (.*)")
+    @Then("^the order should have status (.*)")
     public void orderShouldBeCreatedAndHaveStatus(String expectedOrderStatus) {
         Long orderId =
                 this.response.then()
@@ -155,4 +157,10 @@ public class RestaurantComponentTestStepDefs {
                 .path("status");
         assertEquals(expectedOrderStatus, orderStatus);
     }
+
+    @When("Customer paid {double} USD for the Chicken")
+    public void customerPaidUSDForTheChicken(double amount) {
+
+    }
+
 }

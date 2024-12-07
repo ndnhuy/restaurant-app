@@ -6,10 +6,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.validation.annotation.Validated;
 
 @AllArgsConstructor
 @Setter
@@ -25,12 +23,14 @@ public class CustomerService {
     }
 
     public Customer createCustomer(@Valid CreateCustomerRequest request) {
-        log.info("create customer: {}", request);
-        return customerRepository.save(
+        var newCustomer = customerRepository.save(
                 Customer.builder()
                         .firstName(request.getFirstName())
                         .lastName(request.getLastName())
                         .build()
         );
+        log.info("customer created: {}", newCustomer);
+
+        return newCustomer;
     }
 }

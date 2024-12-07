@@ -1,4 +1,4 @@
-package com.restaurantapp.ndnhuy.customerservice.restaurantservice;
+package com.restaurantapp.ndnhuy.customerservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
