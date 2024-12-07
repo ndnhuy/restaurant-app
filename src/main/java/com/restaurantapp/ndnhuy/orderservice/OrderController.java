@@ -60,7 +60,9 @@ public class OrderController {
     return GetOrderResponse
         .builder()
         .orderId(order.getId())
+        .customerId(order.getCustomerId())
         .status(order.getStatus())
+        .amount(order.getAmount())
         .build();
   }
 }

@@ -5,10 +5,14 @@ import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+import io.restassured.RestAssured;
+import io.restassured.config.JsonConfig;
+import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.response.Response;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,6 +47,7 @@ public class RestaurantComponentTestStepDefs {
     private long customerId;
     private long restaurantId;
     private long menuId;
+    private Long orderId;
   }
 
   @LocalServerPort
@@ -142,9 +148,11 @@ public class RestaurantComponentTestStepDefs {
             .statusCode(200)
             .extract()
             .jsonPath()
-            .getLong("orderId");
+            .getLong("id");
     assertNotNull(orderId);
     assertNotEquals(0L, orderId);
+    testData.orderId = orderId;
+
     String orderStatus = given()
         .when()
         .get(baseUrl("/orders/" + orderId))
@@ -154,6 +162,20 @@ public class RestaurantComponentTestStepDefs {
         .path("status");
     assertEquals(expectedOrderStatus, orderStatus);
   }
+
+  @And("the order should have amount {double} USD")
+  public void orderShouldHaveStatus(double expectedAmount) {
+    var jsonConfig = JsonConfig.jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.DOUBLE);
+    RestAssured.config = RestAssured.config().jsonConfig(jsonConfig);
+    given()
+        .when()
+        .get(baseUrl("/orders/" + testData.orderId))
+        .prettyPeek()
+        .then()
+        .statusCode(200)
+        .body("amount", equalTo(expectedAmount));
+  }
+
 
   @When("Customer paid {double} USD for the Chicken")
   public void customerPaidUSDForTheChicken(double amount) {
