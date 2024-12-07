@@ -1,22 +1,9 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
-import com.restaurantapp.ndnhuy.restaurantservice.Restaurant.MenuItem;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 import lombok.SneakyThrows;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +12,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -56,17 +50,7 @@ public class RestaurantControllerTest {
   @SneakyThrows
   public void testCreateRestaurant() {
     var restaurantName = "Pizza Hut";
-    var menuItems = List.of(
-        Restaurant.MenuItem
-            .builder()
-            .name("pizza type 1")
-            .price(new BigDecimal(5))
-            .build(),
-        Restaurant.MenuItem
-            .builder()
-            .name("pizza type 2")
-            .price(new BigDecimal(10))
-            .build());
+    var menuItems = restaurantHelper.givenMenuItems();
     var rid = restaurantHelper.validRestaurant(restaurantName, menuItems)
         .andExpect(status().isOk())
         .andExpect(jsonPath("id").isNotEmpty())

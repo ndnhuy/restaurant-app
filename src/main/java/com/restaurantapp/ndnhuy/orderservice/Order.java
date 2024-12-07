@@ -1,12 +1,10 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import com.restaurantapp.ndnhuy.restaurantservice.Restaurant;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ra_order")
@@ -14,12 +12,14 @@ import java.util.List;
 @Setter
 public class Order {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Long customerId;
+  private Long customerId;
 
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+  private BigDecimal amount;
+
+  @Enumerated(EnumType.STRING)
+  private OrderStatus status;
 }

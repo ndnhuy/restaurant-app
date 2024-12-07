@@ -1,10 +1,11 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateOrderRequest {
 
-  long customerId;
+  private Long customerId;
+
   private List<LineItem> lineItems;
 
   @Getter

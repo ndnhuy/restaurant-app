@@ -1,17 +1,13 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
-
-import java.util.List;
-import java.util.Optional;
-
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RestaurantService {
@@ -26,7 +22,7 @@ public class RestaurantService {
         this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
-    public Restaurant createRestaurant(String name, List<Restaurant.MenuItem> menuItems) {
+    public Restaurant createRestaurant(String name, List<MenuItem> menuItems) {
         var r = restaurantRepository.save(Restaurant.builder().name(name).menuItems(menuItems).build());
         return r;
     }

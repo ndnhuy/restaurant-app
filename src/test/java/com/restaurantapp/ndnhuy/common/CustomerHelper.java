@@ -1,10 +1,8 @@
 package com.restaurantapp.ndnhuy.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,8 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-import java.io.UnsupportedEncodingException;
-
+import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -27,23 +24,16 @@ public class CustomerHelper {
   @Autowired
   private final MockMvc mockMvc;
 
-  private ResultActions resultActions;
-
-  private CustomerHelper cloneInstance() {
-    var obj = new CustomerHelper(mockMvc);
-    obj.resultActions = this.resultActions;
-    return obj;
-  }
+  private TestHelper testHelper = TestHelper.builder().build();
 
   private CustomerHelper resultActions(ResultActions resultActions) {
-    var obj = cloneInstance();
-    obj.resultActions = resultActions;
-    return obj;
+    testHelper = testHelper.toBuilder().resultActions(resultActions).build();
+    return this;
   }
 
   @SneakyThrows
   public CustomerHelper createCustomer(CreateCustomerRequest request) {
-    return cloneInstance().resultActions(doCreateCustomer(request));
+    return this.resultActions(doCreateCustomer(request));
   }
 
   public CustomerHelper validCustomer() {
@@ -65,34 +55,17 @@ public class CustomerHelper {
   }
 
   public CustomerHelper andExpect(ResultMatcher resultMatcher) {
-    var obj = cloneInstance();
-    try {
-      obj.resultActions.andExpect(resultMatcher);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    return obj;
+    testHelper.andExpect(resultMatcher);
+    return this;
   }
 
   public JSONObject thenGetResponseAsJson() {
-    try {
-      return new JSONObject(this.resultActions.andReturn().getResponse().getContentAsString());
-    } catch (JSONException | UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
+    return testHelper.thenGetResponseAsJson();
   }
 
   @SneakyThrows
   public Long thenGetCustomerId() {
     return this.thenGetResponseAsJson().getLong("customerId");
-  }
-
-  public static String asJsonString(final Object obj) {
-    try {
-      return new ObjectMapper().writeValueAsString(obj);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
 }

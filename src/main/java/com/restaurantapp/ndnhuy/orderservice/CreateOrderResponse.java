@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -13,5 +15,11 @@ import lombok.Setter;
 @Builder
 public class CreateOrderResponse {
 
-  private long orderId;
+  private Long id;
+
+  private Long customerId;
+
+  private BigDecimal amount;
+
+  private OrderStatus status;
 }

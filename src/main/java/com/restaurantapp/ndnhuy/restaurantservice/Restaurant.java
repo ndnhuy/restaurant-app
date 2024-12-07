@@ -3,15 +3,9 @@ package com.restaurantapp.ndnhuy.restaurantservice;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import lombok.*;
+
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Cascade;
 
 @Entity
 @Table(name = "ra_restaurant")
@@ -29,7 +23,7 @@ public class Restaurant {
   @NotBlank(message = "name must not be empty")
   private String name;
 
-//   @Embedded
+  //   @Embedded
 //   @ElementCollection(fetch = FetchType.EAGER)
 //   @CollectionTable(
 //     name = "ra_restaurant_menu_items",
@@ -41,25 +35,4 @@ public class Restaurant {
   @NotEmpty(message = "menu items must be provided")
   private List<MenuItem> menuItems;
 
-  @Entity
-  @Table(name = "ra_restaurant_menu_items")
-  @Access(AccessType.FIELD)
-  @Getter
-  @Builder
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class MenuItem {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private long restaurant_id;
-
-    @NotBlank
-    private String name;
-
-    @NotNull
-    private BigDecimal price;
-  }
 }
