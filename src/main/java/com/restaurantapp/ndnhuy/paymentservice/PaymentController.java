@@ -1,5 +1,6 @@
-package com.restaurantapp.ndnhuy.orderservice;
+package com.restaurantapp.ndnhuy.paymentservice;
 
+import com.restaurantapp.ndnhuy.orderservice.*;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +12,9 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(path = "/orders")
+@RequestMapping(path = "/payments")
 @Slf4j
-public class OrderController {
+public class PaymentController {
 
   private OrderService orderService;
 

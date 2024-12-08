@@ -1,9 +1,6 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,8 +8,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Builder
+@ToString
 public class GetOrderResponse {
-  private Long orderId;
+  private Long id;
   private Long customerId;
   private OrderStatus status;
   private BigDecimal amount;

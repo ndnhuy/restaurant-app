@@ -1,8 +1,11 @@
 package com.restaurantapp.ndnhuy.common;
 
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
+import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -10,30 +13,37 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
+
+import java.math.BigDecimal;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
-public class OrderHelper {
+public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> {
 
   @Autowired
   private final MockMvc mockMvc;
 
-  private TestHelper testHelper = TestHelper.builder().build();
+  @Autowired
+  private CustomerHelper customerHelper;
 
-  private OrderHelper resultActions(ResultActions resultActions) {
-    testHelper = testHelper.toBuilder().resultActions(resultActions).build();
-    return this;
-  }
+  @Autowired
+  private RestaurantHelper restaurantHelper;
 
-  @SneakyThrows
-  public OrderHelper createOrder(CreateOrderRequest request) {
-    return this.resultActions(doCreateOrder(request));
+  @Autowired
+  private RestaurantRepository restaurantRepository;
+
+  public Long givenValidOrderId() {
+    return getResourceId(givenValidResource());
   }
 
   @SneakyThrows
@@ -46,18 +56,82 @@ public class OrderHelper {
         .andDo(print());
   }
 
-  public OrderHelper andExpect(ResultMatcher resultMatcher) {
-    testHelper.andExpect(resultMatcher);
-    return this;
+  @Override
+  public ResultActions doCreateResource(CreateOrderRequest request) {
+    return doCreateOrder(request);
   }
 
-  public JSONObject thenGetResponseAsJson() {
-    return testHelper.thenGetResponseAsJson();
-  }
-
+  @Override
   @SneakyThrows
-  public Long thenGetOrderId() {
-    return this.thenGetResponseAsJson().getLong("id");
+  public JSONObject getResourceById(Long resourceId, ResultAssert resultAssert) {
+    var r = this.mockMvc
+        .perform(get("/orders/" + resourceId))
+        .andDo(print());
+    resultAssert.accept(r);
+    return getReponseAsJson(r);
   }
 
+  @Override
+  @SneakyThrows
+  public CreateOrderRequest givenValidCreationRequest() {
+    // given customer
+    var customerId = customerHelper.givenValidCustomerId();
+
+    // given restaurant with menus
+    var rid = restaurantHelper.givenValidRestaurantId();
+    var response = restaurantHelper.getResourceById(rid, rs -> rs.andExpect(status().isOk()));
+    var arr = response.getJSONArray("menuItems");
+
+    record TestMenuItem(Long id, int quantity) {
+    }
+
+    var menuItems = IntStream.range(0, arr.length())
+        .mapToObj(i -> {
+          try {
+            return arr.get(i);
+          } catch (JSONException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .map(obj -> (JSONObject) obj)
+        .map(obj -> {
+          try {
+            return new TestMenuItem(obj.getLong("id"),
+                ThreadLocalRandom.current().nextInt(0, 10));
+          } catch (JSONException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .toList();
+    return CreateOrderRequest.builder()
+        .customerId(customerId)
+        .lineItems(
+            menuItems
+                .stream()
+                .map(item -> CreateOrderRequest.LineItem.builder()
+                    .menuItemId(item.id)
+                    .quantity(item.quantity)
+                    .build())
+                .toList())
+        .build();
+  }
+
+  public BigDecimal wantTotalAmountFromRequest(CreateOrderRequest request) {
+    var ids = request.getLineItems().stream()
+        .map(CreateOrderRequest.LineItem::getMenuItemId)
+        .toList();
+    var priceById = restaurantRepository.findMenuItemsIn(ids).stream()
+        .collect(Collectors.toMap(MenuItem::getId, MenuItem::getPrice));
+    return request.getLineItems()
+        .stream()
+        .map(item -> priceById.get(item.getMenuItemId()).multiply(BigDecimal.valueOf(item.getQuantity())))
+        .reduce(BigDecimal::add)
+        .get();
+  }
+
+  @Override
+  @SneakyThrows
+  public Long getResourceId(JSONObject jsonObject) {
+    return jsonObject.getLong("id");
+  }
 }

@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.function.Function;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,13 +39,15 @@ public class CustomerControllerTest {
   @Test
   @SneakyThrows
   public void testCreateCustomer_shouldSuccess() {
-    var customerId = customerHelper
-        .validCustomer()
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("customerId").isNotEmpty())
-        .andExpect(jsonPath("firstName").value("John"))
-        .andExpect(jsonPath("lastName").value("Wick"))
-        .thenGetCustomerId();
+    var customerId = customerHelper.getResourceId(
+        customerHelper.createResource(
+            customerHelper.givenValidCreationRequest(),
+            rs -> rs.andExpect(status().isOk())
+                .andExpect(jsonPath("customerId").isNotEmpty())
+                .andExpect(jsonPath("firstName").value("John"))
+                .andExpect(jsonPath("lastName").value("Wick")),
+            customerHelper::getReponseAsJson
+        ));
 
     assertCustomerIsPersisted(customerId, "John", "Wick");
   }
@@ -51,11 +55,10 @@ public class CustomerControllerTest {
   @Test
   @SneakyThrows
   public void testCreateCustomer_shouldFail_whenMissingFirstName() {
-    customerHelper.createCustomer(CreateCustomerRequest
-            .builder()
-            .lastName("Wick")
-            .build())
-        .andExpect(status().isBadRequest());
+    customerHelper.createResource(CreateCustomerRequest
+        .builder()
+        .lastName("Wick")
+        .build(), result -> result.andExpect(status().isBadRequest()), Function.identity());
   }
 
   @Transactional

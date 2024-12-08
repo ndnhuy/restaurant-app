@@ -49,24 +49,29 @@ public class RestaurantControllerTest {
   @Test
   @SneakyThrows
   public void testCreateRestaurant() {
-    var restaurantName = "Pizza Hut";
-    var menuItems = restaurantHelper.givenMenuItems();
-    var rid = restaurantHelper.validRestaurant(restaurantName, menuItems)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("id").isNotEmpty())
-        .thenGetRestaurantId();
+    var rid = restaurantHelper.getResourceId(
+        restaurantHelper.createResource(
+            restaurantHelper.givenValidCreationRequest(),
+            rs -> rs.andExpect(status().isOk())
+                .andExpect(jsonPath("id").isNotEmpty()),
+            restaurantHelper::getReponseAsJson
+        )
+    );
 
-    restaurantHelper.getById(rid)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("id").value(rid))
-        .andExpect(jsonPath("name").value(restaurantName))
-        .andExpect(jsonPath("menuItems").hasJsonPath())
-        .andExpect(jsonPath("menuItems[0].name").value(menuItems.getFirst().getName()))
-        .andExpect(jsonPath("menuItems[0].price").value(menuItems.getFirst().getPrice().setScale(1).toString()))
-        .andExpect(jsonPath("menuItems[1].name").value(menuItems.get(1).getName()))
-        .andExpect(jsonPath("menuItems[1].price").value(menuItems.get(1).getPrice().setScale(1).toString()));
+    var wantRestaurantName = restaurantHelper.givenValidCreationRequest().getName();
+    var wantMenuItems = restaurantHelper.givenValidCreationRequest().getMenuItems();
+    restaurantHelper.getResourceById(rid, rs ->
+        rs.andExpect(status().isOk())
+            .andExpect(jsonPath("id").value(rid))
+            .andExpect(jsonPath("name").value(wantRestaurantName))
+            .andExpect(jsonPath("menuItems").hasJsonPath())
+            .andExpect(jsonPath("menuItems[0].name").value(wantMenuItems.getFirst().getName()))
+            .andExpect(jsonPath("menuItems[0].price").value(wantMenuItems.getFirst().getPrice().setScale(1).toString()))
+            .andExpect(jsonPath("menuItems[1].name").value(wantMenuItems.get(1).getName()))
+            .andExpect(jsonPath("menuItems[1].price").value(wantMenuItems.get(1).getPrice().setScale(1).toString()))
+    );
 
-    assertRestaurantIsPersisted(rid, restaurantName, menuItems);
+    assertRestaurantIsPersisted(rid, wantRestaurantName, wantMenuItems);
   }
 
   @Transactional

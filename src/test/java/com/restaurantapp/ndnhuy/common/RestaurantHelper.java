@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,47 +19,24 @@ import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
-public class RestaurantHelper {
+public class RestaurantHelper implements EntityTestSupport<CreateRestaurantRequest, Long> {
 
   @Autowired
   private final MockMvc mockMvc;
 
-  private TestHelper testHelper = TestHelper.builder().build();
-
-  private RestaurantHelper resultActions(ResultActions resultActions) {
-    testHelper = testHelper.toBuilder().resultActions(resultActions).build();
-    return this;
-  }
-
-  @SneakyThrows
-  public RestaurantHelper createRestaurant(CreateRestaurantRequest request) {
-    return resultActions(doCreateRestaurant(request));
-  }
-
-  public RestaurantHelper validRestaurant(String restaurantName, List<MenuItem> menus) {
-    return createRestaurant(CreateRestaurantRequest
-        .builder()
-        .name(restaurantName)
-        .menuItems(menus)
-        .build());
-  }
-
-  public List<MenuItem> givenMenuItems() {
-    return List.of(
-        MenuItem
-            .builder()
-            .name("pizza type 1")
-            .price(new BigDecimal(5.5))
-            .build(),
-        MenuItem
-            .builder()
-            .name("pizza type 2")
-            .price(new BigDecimal(10))
-            .build());
+  public Long givenValidRestaurantId() {
+    return getResourceId(
+        createResource(
+            givenValidCreationRequest(),
+            rs -> rs.andExpect(status().isOk()),
+            this::getReponseAsJson
+        )
+    );
   }
 
   @SneakyThrows
@@ -73,27 +49,43 @@ public class RestaurantHelper {
         .andDo(print());
   }
 
-  public RestaurantHelper andExpect(ResultMatcher resultMatcher) {
-    testHelper.andExpect(resultMatcher);
-    return this;
+  @Override
+  public ResultActions doCreateResource(CreateRestaurantRequest createRestaurantRequest) {
+    return doCreateRestaurant(createRestaurantRequest);
   }
 
-  public JSONObject thenGetResponseAsJson() {
-    return testHelper.thenGetResponseAsJson();
-  }
-
+  @Override
   @SneakyThrows
-  public RestaurantHelper getById(Long id) {
-    var obj = new RestaurantHelper(mockMvc);
-    return obj.resultActions(this.mockMvc
-        .perform(get("/restaurants/" + id))
-        .andDo(print())
-    );
+  public JSONObject getResourceById(Long resourceId, ResultAssert resultAssert) {
+    var r = this.mockMvc
+        .perform(get("/restaurants/" + resourceId))
+        .andDo(print());
+    resultAssert.accept(r);
+    return getReponseAsJson(r);
   }
 
+  @Override
+  public CreateRestaurantRequest givenValidCreationRequest() {
+    return CreateRestaurantRequest
+        .builder()
+        .name("Pizza Hut")
+        .menuItems(List.of(
+            MenuItem
+                .builder()
+                .name("pizza type 1")
+                .price(new BigDecimal(5.5))
+                .build(),
+            MenuItem
+                .builder()
+                .name("pizza type 2")
+                .price(new BigDecimal(10))
+                .build()))
+        .build();
+  }
+
+  @Override
   @SneakyThrows
-  public Long thenGetRestaurantId() {
-    return this.thenGetResponseAsJson().getLong("id");
+  public Long getResourceId(JSONObject jsonObject) {
+    return jsonObject.getLong("id");
   }
-
 }

@@ -7,30 +7,30 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
+  private final PaymentRepository paymentRepository;
 
-    public PaymentOrder createOrder(Long customerId, Double amount) {
-        var order = PaymentOrder.builder()
-                .customerId(customerId)
-                .amount(amount)
-                .status(PaymentStatus.INIT)
-                .build();
+  public PaymentOrder createOrder(Long customerId, Double amount) {
+    var order = PaymentOrder.builder()
+        .customerId(customerId)
+        .amount(amount)
+        .status(PaymentStatus.INIT)
+        .build();
 
-        return paymentRepository.save(order);
-    }
+    return paymentRepository.save(order);
+  }
 
-    public PaymentOrder createAndPay(Long customerId, Double amount) {
-        var order = createOrder(customerId, amount);
-        pay(order.getId());
-        return order;
-    }
+  public PaymentOrder createAndPay(Long customerId, Double amount) {
+    var order = createOrder(customerId, amount);
+    pay(order.getId());
+    return order;
+  }
 
-    public void pay(Long orderId) {
-        paymentRepository.findById(orderId)
-                .map(PaymentOrder::approve)
-                .ifPresentOrElse(paymentRepository::save, () -> {
-                    throw new RuntimeException("Order not found");
-                });
-    }
+  public void pay(Long orderId) {
+    paymentRepository.findById(orderId)
+        .map(PaymentOrder::approve)
+        .ifPresentOrElse(paymentRepository::save, () -> {
+          throw new RuntimeException("Order not found");
+        });
+  }
 
 }
