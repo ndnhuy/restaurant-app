@@ -31,7 +31,7 @@ public class Restaurant {
 //     joinColumns = { @JoinColumn(name = "restaurant_id") }
 //   )
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  @JoinColumn(name = "restaurant_id")
+  @JoinColumn(name = "restaurantId")
   @NotEmpty(message = "menu items must be provided")
   private List<MenuItem> menuItems;
 

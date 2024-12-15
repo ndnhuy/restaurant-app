@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+import java.util.function.Function;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +58,7 @@ public class OrderControllerTest {
             rs -> rs.andExpect(status().isOk())
                 .andExpect(jsonPath("id").isNotEmpty())
                 .andExpect(jsonPath("customerId").value(request.getCustomerId()))
+                .andExpect(jsonPath("restaurantId").value(request.getRestaurantId()))
                 .andExpect(jsonPath("status").value(OrderStatus.CREATED.toString()))
                 .andExpect(jsonPath("amount").value(wantOrderAmount)),
             orderHelper::getReponseAsJson
@@ -67,6 +71,58 @@ public class OrderControllerTest {
             .andExpect(jsonPath("amount").value(wantOrderAmount))
             .andExpect(status().isOk()));
   }
+
+  @Test
+  @SneakyThrows
+  public void testCreateOrder_shouldFailWhenMenuItemsNotFound() {
+    // given customer
+    var customerId = customerHelper.givenValidCustomerId();
+
+    // given restaurant with menus
+    var rid = restaurantHelper.givenValidRestaurantId();
+    var request = CreateOrderRequest.builder()
+        .customerId(customerId)
+        .restaurantId(rid)
+        .lineItems(
+            List.of(
+                CreateOrderRequest.LineItem.builder()
+                    .menuItemId(999L)
+                    .quantity(1)
+                    .build()
+            ))
+        .build();
+
+    orderHelper.createResource(
+        request,
+        rs -> rs.andExpect(status().isBadRequest()).andDo(print()),
+        Function.identity()
+    );
+  }
+
+  @Test
+  @SneakyThrows
+  public void testCreateOrder_shouldFailWhenMenuItemsNotBelongToRestaurant() {
+    // given customer
+    var customerId = customerHelper.givenValidCustomerId();
+
+    // given restaurant with menus
+    var rid = restaurantHelper.givenValidRestaurantId();
+    var rid2 = restaurantHelper.givenValidRestaurantId();
+    var request = CreateOrderRequest.builder()
+        .customerId(customerId)
+        .restaurantId(rid)
+        .lineItems(
+            orderHelper.getAllMenuItemsOfRestaurant(rid2)
+        )
+        .build();
+
+    orderHelper.createResource(
+        request,
+        rs -> rs.andExpect(status().isBadRequest()).andDo(print()),
+        Function.identity()
+    );
+  }
+
 
   @Test
   @SneakyThrows

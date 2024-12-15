@@ -23,7 +23,7 @@ public class MenuItem {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private long restaurant_id;
+  private Long restaurantId;
 
   @NotBlank
   private String name;

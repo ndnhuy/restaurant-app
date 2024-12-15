@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Builder
 @Entity
 @Table(name = "ra_payment_order")
@@ -12,26 +14,29 @@ import lombok.Setter;
 @Setter
 public class PaymentOrder {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Long customerId;
+  private Long orderId;
 
-    private Double amount;
+  private Long customerId;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus status;
+  private BigDecimal amount;
 
-    public PaymentOrder approve() {
-        this.status = PaymentStatus.SUCCESS;
-        return this;
-    }
 
-    public PaymentOrder reject() {
-        this.status = PaymentStatus.FAIL;
-        return this;
-    }
+  @Enumerated(EnumType.STRING)
+  private PaymentStatus status;
+
+  public PaymentOrder approve() {
+    this.status = PaymentStatus.SUCCESS;
+    return this;
+  }
+
+  public PaymentOrder reject() {
+    this.status = PaymentStatus.FAIL;
+    return this;
+  }
 
 
 }

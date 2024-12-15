@@ -3,6 +3,7 @@ package com.restaurantapp.ndnhuy.bdd;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
+import com.restaurantapp.ndnhuy.paymentservice.CreatePaymentOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import io.cucumber.java.en.And;
@@ -130,6 +131,7 @@ public class RestaurantComponentTestStepDefs {
             .contentType(CONTENT_TYPE)
             .body(CreateOrderRequest.builder()
                 .customerId(testData.getCustomerId())
+                .restaurantId(testData.getRestaurantId())
                 .lineItems(List.of(
                     CreateOrderRequest.LineItem.builder()
                         .menuItemId(menuId)
@@ -143,12 +145,11 @@ public class RestaurantComponentTestStepDefs {
 
   @Then("^the order should have status (.*)")
   public void orderShouldBeCreatedAndHaveStatus(String expectedOrderStatus) {
-    Long orderId =
-        this.response.then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getLong("id");
+    Long orderId = this.response
+        .prettyPeek()
+        .then()
+        .statusCode(200)
+        .extract().jsonPath().getLong("id");
     assertNotNull(orderId);
     assertNotEquals(0L, orderId);
     testData.orderId = orderId;
@@ -177,8 +178,28 @@ public class RestaurantComponentTestStepDefs {
   }
 
 
-  @When("Customer paid {double} USD for the Chicken")
-  public void customerPaidUSDForTheChicken(double amount) {
+  @When("Customer paid for the order")
+  public void customerPaidUSDForTheChicken() {
+    given()
+        .when()
+        .contentType(CONTENT_TYPE)
+        .body(
+            CreatePaymentOrderRequest.builder()
+                .orderId(testData.getOrderId())
+                .build()
+        )
+        .post(baseUrl("/payments/createAndPay"))
+        .then()
+        .statusCode(200);
+  }
+
+  @When("Restaurant accepts the order")
+  public void restaurantAcceptsTheOrder() {
+
+  }
+
+  @And("Order is assigned to a shipper")
+  public void orderIsAssignedToShipper() {
 
   }
 

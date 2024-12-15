@@ -1,6 +1,7 @@
 package com.restaurantapp.ndnhuy.common;
 
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
+import com.restaurantapp.ndnhuy.orderservice.GetOrderResponse;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -71,21 +74,21 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
     return getReponseAsJson(r);
   }
 
-  @Override
   @SneakyThrows
-  public CreateOrderRequest givenValidCreationRequest() {
-    // given customer
-    var customerId = customerHelper.givenValidCustomerId();
+  public GetOrderResponse fetchOrderById(Long orderId) {
+    var responseJson = getResourceById(orderId, rs -> rs.andExpect(status().isOk()));
+    return new ObjectMapper().readValue(responseJson.toString(), GetOrderResponse.class);
+  }
 
-    // given restaurant with menus
-    var rid = restaurantHelper.givenValidRestaurantId();
-    var response = restaurantHelper.getResourceById(rid, rs -> rs.andExpect(status().isOk()));
+  @SneakyThrows
+  public List<CreateOrderRequest.LineItem> getAllMenuItemsOfRestaurant(Long restaurantId) {
+    var response = restaurantHelper.getResourceById(restaurantId, rs -> rs.andExpect(status().isOk()));
     var arr = response.getJSONArray("menuItems");
 
     record TestMenuItem(Long id, int quantity) {
     }
 
-    var menuItems = IntStream.range(0, arr.length())
+    return IntStream.range(0, arr.length())
         .mapToObj(i -> {
           try {
             return arr.get(i);
@@ -102,17 +105,27 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
             throw new RuntimeException(e);
           }
         })
+        .map(item -> CreateOrderRequest.LineItem.builder()
+            .menuItemId(item.id)
+            .quantity(item.quantity)
+            .build())
         .toList();
+  }
+
+  @Override
+  @SneakyThrows
+  public CreateOrderRequest givenValidCreationRequest() {
+    // given customer
+    var customerId = customerHelper.givenValidCustomerId();
+
+    // given restaurant with menus
+    var rid = restaurantHelper.givenValidRestaurantId();
     return CreateOrderRequest.builder()
         .customerId(customerId)
+        .restaurantId(rid)
         .lineItems(
-            menuItems
-                .stream()
-                .map(item -> CreateOrderRequest.LineItem.builder()
-                    .menuItemId(item.id)
-                    .quantity(item.quantity)
-                    .build())
-                .toList())
+            getAllMenuItemsOfRestaurant(rid)
+        )
         .build();
   }
 
@@ -134,4 +147,5 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
   public Long getResourceId(JSONObject jsonObject) {
     return jsonObject.getLong("id");
   }
+
 }

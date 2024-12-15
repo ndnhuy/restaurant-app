@@ -19,6 +19,8 @@ public class CreateOrderResponse {
 
   private Long customerId;
 
+  private Long restaurantId;
+
   private BigDecimal amount;
 
   private OrderStatus status;

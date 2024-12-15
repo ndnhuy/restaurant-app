@@ -18,8 +18,21 @@ public class Order {
 
   private Long customerId;
 
+  private Long restaurantId;
+
   private BigDecimal amount;
 
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
+
+  public Order paid() {
+    this.status = OrderStatus.PAID;
+    return this;
+  }
+
+  public Order accepted() {
+    this.status = OrderStatus.ACCEPTED;
+    return this;
+  }
+
 }

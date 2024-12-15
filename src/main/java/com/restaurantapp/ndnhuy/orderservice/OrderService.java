@@ -1,6 +1,7 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
+import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -33,29 +34,46 @@ public class OrderService {
       throw new IllegalArgumentException("invalid customer id");
     }
 
-    var menuItems = restaurantRepository.findMenuItemsIn(
-        request.getLineItems()
-            .stream()
-            .map(CreateOrderRequest.LineItem::getMenuItemId)
-            .toList());
+    var menuIds = request.getLineItems()
+        .stream()
+        .map(CreateOrderRequest.LineItem::getMenuItemId)
+        .toList();
+    var menuItems = restaurantRepository.findMenuItemsIn(menuIds);
     if (CollectionUtils.isEmpty(menuItems)) {
-      throw new OrderException("menu items not found");
+      throw new MenuItemsNotFoundException(menuIds);
+    }
+
+    var invalidMenuIds = menuItems.stream().filter(item -> !item.getRestaurantId().equals(request.getRestaurantId()))
+        .map(item -> RestaurantDTO.MenuItemDTO.builder()
+            .id(item.getId())
+            .price(item.getPrice())
+            .name(item.getName())
+            .build())
+        .toList();
+    if (!CollectionUtils.isEmpty(invalidMenuIds)) {
+      throw new InvalidMenuItemsException(invalidMenuIds, "menu items not belong to restaurant " + request.getRestaurantId());
     }
 
     var priceById = menuItems.stream().collect(Collectors.toMap(MenuItem::getId, MenuItem::getPrice));
     var amount = request.getLineItems().stream()
         .map(item -> priceById.get(item.getMenuItemId()).multiply(BigDecimal.valueOf(item.getQuantity())))
         .reduce(BigDecimal::add)
-        .orElseThrow(() -> new OrderException("error calculate order amount"));
+        .orElseThrow(() -> new GeneralException("error calculate order amount"));
 
     var order = new Order();
     order.setStatus(OrderStatus.CREATED);
     order.setCustomerId(request.getCustomerId());
     order.setAmount(amount);
+    order.setRestaurantId(request.getRestaurantId());
 
     orderRepository.save(order);
 
     return order;
+  }
+
+  public void confirmOrderWasPaid(Long orderId) {
+    var order = findOrder(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+    orderRepository.save(order.paid());
   }
 
   // this is dummy method used for testing grafana only
@@ -107,5 +125,9 @@ public class OrderService {
 
   public Optional<Order> findOrder(long orderId) {
     return orderRepository.findById(orderId);
+  }
+
+  public void save(Order order) {
+    orderRepository.save(order);
   }
 }

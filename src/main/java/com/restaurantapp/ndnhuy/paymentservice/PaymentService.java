@@ -1,31 +1,45 @@
 package com.restaurantapp.ndnhuy.paymentservice;
 
+import com.restaurantapp.ndnhuy.orderservice.Order;
+import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
 
-  public PaymentOrder createOrder(Long customerId, Double amount) {
-    var order = PaymentOrder.builder()
-        .customerId(customerId)
-        .amount(amount)
+  private final OrderService orderService;
+
+  private PaymentOrder createOrder(Order order) {
+    var pmtOrder = PaymentOrder.builder()
+        .orderId(order.getId())
+        .customerId(order.getCustomerId())
+        .amount(order.getAmount())
         .status(PaymentStatus.INIT)
         .build();
 
-    return paymentRepository.save(order);
+    return paymentRepository.save(pmtOrder);
   }
 
-  public PaymentOrder createAndPay(Long customerId, Double amount) {
-    var order = createOrder(customerId, amount);
-    pay(order.getId());
-    return order;
+  public PaymentOrder createAndPay(Long orderId) {
+    log.info("create and pay order {}", orderId);
+    var order = orderService.findOrder(orderId).orElseThrow(() -> new PaymentExecption("order not found"));
+    var pmtOrder = createOrder(order);
+
+    pay(pmtOrder.getId());
+
+    orderService.confirmOrderWasPaid(orderId);
+
+    log.info("payment order created and paid: order {}, payment {}", order, pmtOrder);
+    return pmtOrder;
   }
 
-  public void pay(Long orderId) {
+  private void pay(Long orderId) {
     paymentRepository.findById(orderId)
         .map(PaymentOrder::approve)
         .ifPresentOrElse(paymentRepository::save, () -> {

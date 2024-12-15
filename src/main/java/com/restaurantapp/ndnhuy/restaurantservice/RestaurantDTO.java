@@ -16,8 +16,10 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,8 +45,10 @@ public class RestaurantDTO {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @ToString
   public static class MenuItemDTO {
 
+    @NotNull
     private Long id;
 
     @NotBlank

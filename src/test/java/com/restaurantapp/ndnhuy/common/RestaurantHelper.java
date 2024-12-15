@@ -1,5 +1,6 @@
 package com.restaurantapp.ndnhuy.common;
 
+import com.restaurantapp.ndnhuy.restaurantservice.AcceptOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import lombok.RequiredArgsConstructor;
@@ -87,5 +88,17 @@ public class RestaurantHelper implements EntityTestSupport<CreateRestaurantReque
   @SneakyThrows
   public Long getResourceId(JSONObject jsonObject) {
     return jsonObject.getLong("id");
+  }
+
+  @SneakyThrows
+  public ResultActions acceptOrder(Long orderId) {
+    return this.mockMvc.perform(
+            post("/restaurants/accept")
+                .contentType("application/json")
+                .content(asJsonString(AcceptOrderRequest.builder()
+                    .orderId(orderId)
+                    .build()))
+        )
+        .andDo(print());
   }
 }

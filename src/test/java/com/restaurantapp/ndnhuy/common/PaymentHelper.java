@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,39 +18,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
-public class PaymentHelper {
+public class PaymentHelper implements EntityTestSupport<CreatePaymentOrderRequest, Long> {
 
   @Autowired
   private final MockMvc mockMvc;
 
   private TestHelper testHelper = TestHelper.builder().build();
 
-  private PaymentHelper resultActions(ResultActions resultActions) {
-    testHelper = testHelper.toBuilder().resultActions(resultActions).build();
-    return this;
-  }
-
-  public PaymentHelper createPaymentOrder(CreatePaymentOrderRequest request) {
-    return this.resultActions(doCreatePaymentOrder(request));
-  }
-
   @SneakyThrows
   private ResultActions doCreatePaymentOrder(CreatePaymentOrderRequest request) {
     return this.mockMvc.perform(
-            post("/payment")
+            post("/payments/createAndPay")
                 .contentType("application/json")
                 .content(asJsonString(request))
         )
         .andDo(print());
   }
 
-  public PaymentHelper andExpect(ResultMatcher resultMatcher) {
-    testHelper.andExpect(resultMatcher);
-    return this;
+  @Override
+  public ResultActions doCreateResource(CreatePaymentOrderRequest request) {
+    return doCreatePaymentOrder(request);
   }
 
-  public JSONObject thenGetResponseAsJson() {
-    return testHelper.thenGetResponseAsJson();
+  @Override
+  public JSONObject getResourceById(Long resourceId, ResultAssert resultAssert) {
+    return null;
   }
 
+  @Override
+  public CreatePaymentOrderRequest givenValidCreationRequest() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Long getResourceId(JSONObject jsonObject) {
+    throw new UnsupportedOperationException();
+  }
 }

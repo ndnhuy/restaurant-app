@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,12 +47,17 @@ public class PaymentControllerTest {
   public void testPayOrder_shouldSuccess() {
     // given order
     var orderId = orderHelper.givenValidOrderId();
-    paymentHelper.createPaymentOrder(CreatePaymentOrderRequest.builder()
+    var order = orderHelper.fetchOrderById(orderId);
+    paymentHelper.createResource(CreatePaymentOrderRequest.builder()
             .orderId(orderId)
-            .build())
-        .andExpect(status().isOk());
-
-
+            .build(),
+        rs -> rs.andExpect(status().isOk())
+            .andExpect(jsonPath("id").isNotEmpty())
+            .andExpect(jsonPath("orderId").value(order.getId()))
+            .andExpect(jsonPath("status").value(PaymentStatus.SUCCESS.toString()))
+            .andExpect(jsonPath("amount").value(order.getAmount()))
+            .andExpect(jsonPath("customerId").value(order.getCustomerId())),
+        paymentHelper::getReponseAsJson);
   }
 
 }

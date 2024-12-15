@@ -2,7 +2,9 @@ package com.restaurantapp.ndnhuy.restaurantservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
+import com.restaurantapp.ndnhuy.common.OrderHelper;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
+import com.restaurantapp.ndnhuy.orderservice.OrderStatus;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,13 +42,8 @@ public class RestaurantControllerTest {
   @Autowired
   private RestaurantHelper restaurantHelper;
 
-  @Test
-  @SneakyThrows
-  public void testGrafana() {
-    this.mockMvc.perform(
-        post("/orders/create/INIT?waitTimeInMs=0&processTimeInMs=100")
-            .contentType("application/json"));
-  }
+  @Autowired
+  private OrderHelper orderHelper;
 
   @Test
   @SneakyThrows
@@ -72,6 +71,34 @@ public class RestaurantControllerTest {
     );
 
     assertRestaurantIsPersisted(rid, wantRestaurantName, wantMenuItems);
+  }
+
+  @Test
+  @SneakyThrows
+  public void testAcceptOrder() {
+    // given a restaurant
+    var rid = restaurantHelper.getResourceId(
+        restaurantHelper.createResource(
+            restaurantHelper.givenValidCreationRequest(),
+            rs -> rs.andExpect(status().isOk())
+                .andExpect(jsonPath("id").isNotEmpty()),
+            restaurantHelper::getReponseAsJson
+        )
+    );
+
+    // given an order
+    var orderId = orderHelper.givenValidOrderId();
+
+    // when restaurant accepts the order
+    restaurantHelper.acceptOrder(orderId)
+        .andExpect(status().isOk());
+
+    // order should be accepted
+    orderHelper.getResourceById(
+        orderId,
+        rs -> rs.andExpect(status().isOk())
+            .andExpect(jsonPath("status").value(OrderStatus.ACCEPTED.toString()))
+    );
   }
 
   @Transactional

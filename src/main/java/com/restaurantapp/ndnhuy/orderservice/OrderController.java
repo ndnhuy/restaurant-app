@@ -23,6 +23,7 @@ public class OrderController {
     return CreateOrderResponse.builder()
         .id(order.getId())
         .customerId(order.getCustomerId())
+        .restaurantId(order.getRestaurantId())
         .status(order.getStatus())
         .amount(order.getAmount())
         .build();
@@ -64,5 +65,10 @@ public class OrderController {
         .status(order.getStatus())
         .amount(order.getAmount())
         .build();
+  }
+
+  @ExceptionHandler(exception = {MenuItemsNotFoundException.class, InvalidMenuItemsException.class})
+  public ResponseEntity<String> handle(RuntimeException exception) {
+    return ResponseEntity.badRequest().body(exception.getMessage());
   }
 }
