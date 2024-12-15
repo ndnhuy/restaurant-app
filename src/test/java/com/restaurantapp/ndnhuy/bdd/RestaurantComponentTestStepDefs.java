@@ -3,7 +3,9 @@ package com.restaurantapp.ndnhuy.bdd;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.paymentservice.CreatePaymentOrderRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.AcceptOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import io.cucumber.java.en.And;
@@ -133,7 +135,7 @@ public class RestaurantComponentTestStepDefs {
                 .customerId(testData.getCustomerId())
                 .restaurantId(testData.getRestaurantId())
                 .lineItems(List.of(
-                    CreateOrderRequest.LineItem.builder()
+                    RequestLineItem.builder()
                         .menuItemId(menuId)
                         .quantity(1)
                         .build()
@@ -195,7 +197,17 @@ public class RestaurantComponentTestStepDefs {
 
   @When("Restaurant accepts the order")
   public void restaurantAcceptsTheOrder() {
-
+    given()
+        .when()
+        .contentType(CONTENT_TYPE)
+        .body(
+            AcceptOrderRequest.builder()
+                .orderId(testData.getOrderId())
+                .build()
+        )
+        .post(baseUrl("/restaurants/accept"))
+        .then()
+        .statusCode(200);
   }
 
   @And("Order is assigned to a shipper")

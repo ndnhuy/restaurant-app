@@ -11,5 +11,6 @@ Feature: Place Order
     When Customer paid for the order
     Then the order should have status PAID
     When Restaurant accepts the order
-    And Order is assigned to a shipper
+    Then the order should have status PAID
+    When Order is assigned to a shipper
     Then the order should have status ACCEPTED

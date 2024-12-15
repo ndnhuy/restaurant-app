@@ -1,6 +1,6 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import jakarta.validation.constraints.NotBlank;
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,13 +22,6 @@ public class CreateOrderRequest {
   private Long restaurantId;
 
   @NotNull
-  private List<LineItem> lineItems;
+  private List<RequestLineItem> lineItems;
 
-  @Getter
-  @Builder
-  public static class LineItem {
-
-    private Long menuItemId;
-    private int quantity;
-  }
 }

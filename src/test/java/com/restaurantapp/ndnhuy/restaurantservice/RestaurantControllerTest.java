@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.restaurantapp.ndnhuy.common.TestHelper.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -92,6 +91,8 @@ public class RestaurantControllerTest {
     // when restaurant accepts the order
     restaurantHelper.acceptOrder(orderId)
         .andExpect(status().isOk());
+
+    // then the ticket is created with correct menu items and amount
 
     // order should be accepted
     orderHelper.getResourceById(

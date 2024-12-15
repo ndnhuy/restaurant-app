@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.CustomerHelper;
 import com.restaurantapp.ndnhuy.common.OrderHelper;
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
 import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import lombok.SneakyThrows;
@@ -14,8 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -64,12 +68,26 @@ public class OrderControllerTest {
             orderHelper::getReponseAsJson
         )
     );
+    Consumer<ResultActions> assertMenuItems = rs -> {
+      for (var i = 0; i < request.getLineItems().size(); i++) {
+        var wantMenu = request.getLineItems().get(i);
+        BiFunction<Integer, String, String> path = (index, name) -> String.format("menuItems[%d].%s", index, name);
+        try {
+          rs.andExpect(jsonPath(path.apply(i, "id")).value(wantMenu.getMenuItemId()))
+              .andExpect(jsonPath(path.apply(i, "quantity")).value(wantMenu.getQuantity()));
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
     orderHelper.getResourceById(orderId, rs ->
-        rs.andExpect(jsonPath("id").value(orderId))
-            .andExpect(jsonPath("customerId").value(request.getCustomerId()))
-            .andExpect(jsonPath("status").value(OrderStatus.CREATED.toString()))
-            .andExpect(jsonPath("amount").value(wantOrderAmount))
-            .andExpect(status().isOk()));
+        assertMenuItems.accept(
+            rs.andExpect(jsonPath("id").value(orderId))
+                .andExpect(jsonPath("customerId").value(request.getCustomerId()))
+                .andExpect(jsonPath("status").value(OrderStatus.CREATED.toString()))
+                .andExpect(jsonPath("amount").value(wantOrderAmount))
+                .andExpect(status().isOk()))
+    );
   }
 
   @Test
@@ -85,7 +103,7 @@ public class OrderControllerTest {
         .restaurantId(rid)
         .lineItems(
             List.of(
-                CreateOrderRequest.LineItem.builder()
+                RequestLineItem.builder()
                     .menuItemId(999L)
                     .quantity(1)
                     .build()

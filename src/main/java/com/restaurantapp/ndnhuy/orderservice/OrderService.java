@@ -1,8 +1,7 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
-import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
-import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO;
-import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
+import com.restaurantapp.ndnhuy.restaurantservice.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -25,10 +25,11 @@ public class OrderService {
 
   private OrderRepository orderRepository;
 
-  private RestaurantRepository restaurantRepository;
+  private RestaurantService restaurantService;
 
   private MeterRegistry meterRegistry;
 
+  @Transactional
   public Order createOrder(@NonNull CreateOrderRequest request) {
     if (request.getCustomerId() == 0) {
       throw new IllegalArgumentException("invalid customer id");
@@ -36,9 +37,9 @@ public class OrderService {
 
     var menuIds = request.getLineItems()
         .stream()
-        .map(CreateOrderRequest.LineItem::getMenuItemId)
+        .map(RequestLineItem::getMenuItemId)
         .toList();
-    var menuItems = restaurantRepository.findMenuItemsIn(menuIds);
+    var menuItems = restaurantService.findMenuItems(menuIds);
     if (CollectionUtils.isEmpty(menuItems)) {
       throw new MenuItemsNotFoundException(menuIds);
     }
@@ -67,6 +68,19 @@ public class OrderService {
     order.setRestaurantId(request.getRestaurantId());
 
     orderRepository.save(order);
+
+    log.info("order created: {}", order);
+
+    // create ticket
+    var ticketId = restaurantService.createTicket(
+        CreateTicketRequest.builder()
+            .customerId(order.getCustomerId())
+            .restaurantId(order.getRestaurantId())
+            .lineItems(request.getLineItems())
+            .build()
+    );
+
+    log.info("ticket created: {}", ticketId);
 
     return order;
   }

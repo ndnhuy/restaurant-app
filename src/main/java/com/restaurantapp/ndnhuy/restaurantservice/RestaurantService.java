@@ -6,8 +6,6 @@ import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -19,9 +17,9 @@ public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
 
-  private final TransactionTemplate transactionTemplate;
-
   private final OrderService orderService;
+
+  private final TicketRepository ticketRepository;
 
   public Restaurant createRestaurant(String name, List<MenuItem> menuItems) {
     return restaurantRepository.save(Restaurant.builder().name(name).menuItems(menuItems).build());
@@ -33,6 +31,25 @@ public class RestaurantService {
         .ifPresentOrElse(orderService::save, () -> {
           throw new OrderNotFoundException(orderId);
         });
+  }
+
+  public List<MenuItem> findMenuItems(List<Long> ids) {
+    return restaurantRepository.findMenuItemsIn(ids);
+  }
+
+  public Long createTicket(CreateTicketRequest request) {
+    var ticket = ticketRepository.save(Ticket.builder()
+        .restaurantId(request.getRestaurantId())
+        .customerId(request.getCustomerId())
+        .orderId(request.getOrderId())
+        .status(TicketStatus.CREATED)
+        .lineItems(request.getLineItems().stream().map(item -> TicketLineItem.builder()
+                .menuItemId(item.getMenuItemId())
+                .quantity(item.getQuantity())
+                .build())
+            .toList())
+        .build());
+    return ticket.getId();
   }
 
   public Optional<RestaurantDTO> getRestaurantById(long id) {

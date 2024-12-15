@@ -81,7 +81,7 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
   }
 
   @SneakyThrows
-  public List<CreateOrderRequest.LineItem> getAllMenuItemsOfRestaurant(Long restaurantId) {
+  public List<RequestLineItem> getAllMenuItemsOfRestaurant(Long restaurantId) {
     var response = restaurantHelper.getResourceById(restaurantId, rs -> rs.andExpect(status().isOk()));
     var arr = response.getJSONArray("menuItems");
 
@@ -105,7 +105,7 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
             throw new RuntimeException(e);
           }
         })
-        .map(item -> CreateOrderRequest.LineItem.builder()
+        .map(item -> RequestLineItem.builder()
             .menuItemId(item.id)
             .quantity(item.quantity)
             .build())
@@ -131,7 +131,7 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
 
   public BigDecimal wantTotalAmountFromRequest(CreateOrderRequest request) {
     var ids = request.getLineItems().stream()
-        .map(CreateOrderRequest.LineItem::getMenuItemId)
+        .map(RequestLineItem::getMenuItemId)
         .toList();
     var priceById = restaurantRepository.findMenuItemsIn(ids).stream()
         .collect(Collectors.toMap(MenuItem::getId, MenuItem::getPrice));
