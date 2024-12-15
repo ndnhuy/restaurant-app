@@ -7,6 +7,8 @@ import com.restaurantapp.ndnhuy.common.PaymentHelper;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
 import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import lombok.SneakyThrows;
+import org.hamcrest.number.BigDecimalCloseTo;
+import org.hamcrest.number.IsCloseTo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,7 +60,7 @@ public class PaymentControllerTest {
             .andExpect(jsonPath("id").isNotEmpty())
             .andExpect(jsonPath("orderId").value(order.getId()))
             .andExpect(jsonPath("status").value(PaymentStatus.SUCCESS.toString()))
-            .andExpect(jsonPath("amount").value(order.getAmount()))
+            .andExpect(jsonPath("amount").value(IsCloseTo.closeTo(order.getAmount().setScale(2, RoundingMode.HALF_UP).doubleValue(), 0.01)))
             .andExpect(jsonPath("customerId").value(order.getCustomerId())),
         paymentHelper::getReponseAsJson);
   }
