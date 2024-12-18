@@ -101,4 +101,12 @@ public class RestaurantHelper implements EntityTestSupport<CreateRestaurantReque
         )
         .andDo(print());
   }
+
+  @SneakyThrows
+  public ResultActions findTicketByOrder(Long orderId) {
+    return this.mockMvc.perform(
+            get("/restaurants/ticket/order/" + orderId)
+        )
+        .andDo(print());
+  }
 }

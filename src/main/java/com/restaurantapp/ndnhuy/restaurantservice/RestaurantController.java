@@ -27,6 +27,11 @@ public class RestaurantController {
     return CreateRestaurantResponse.builder().id(r.getId()).build();
   }
 
+  @GetMapping(path = "/ticket/order/{orderId}")
+  public ResponseEntity<TicketDto> findTicketByOrder(@PathVariable long orderId) {
+    return ResponseEntity.ok(service.findTicketByOrderId(orderId));
+  }
+
   @PostMapping("/accept")
   public void acceptOrder(@Valid @RequestBody AcceptOrderRequest acceptOrderRequest) {
     log.info("accept order: {}", acceptOrderRequest);

@@ -3,8 +3,10 @@ package com.restaurantapp.ndnhuy.restaurantservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.OrderHelper;
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
 import com.restaurantapp.ndnhuy.orderservice.OrderStatus;
+import com.restaurantapp.ndnhuy.utils.RandomUtils;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,24 @@ public class RestaurantControllerTest {
     );
 
     assertRestaurantIsPersisted(rid, wantRestaurantName, wantMenuItems);
+  }
+
+  @Test
+  @SneakyThrows
+  public void testGetTicketByOrder() {
+    var orderId = RandomUtils.randomPositiveLong();
+    restaurantService.createTicket(CreateTicketRequest.builder()
+        .restaurantId(RandomUtils.randomPositiveLong())
+        .orderId(orderId)
+        .customerId(RandomUtils.randomPositiveLong())
+        .lineItems(List.of(RequestLineItem.builder()
+            .menuItemId(RandomUtils.randomPositiveLong())
+            .quantity(10)
+            .build()))
+        .build());
+    restaurantHelper.findTicketByOrder(orderId)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("status").value(TicketStatus.CREATED.toString()));
   }
 
   @Test

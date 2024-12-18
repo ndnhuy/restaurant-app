@@ -8,6 +8,7 @@ Feature: Place Order
     When I place an order for a Chicken
     Then the order should have status CREATED
     And the order should have amount 10 USD
+    And a ticket is created
     When Customer paid for the order
     Then the order should have status PAID
     When Restaurant accepts the order

@@ -1,14 +1,16 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
+import com.restaurantapp.ndnhuy.common.events.OrderCreated;
 import com.restaurantapp.ndnhuy.restaurantservice.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -17,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Setter
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -25,9 +26,12 @@ public class OrderService {
 
   private OrderRepository orderRepository;
 
+  @Lazy
   private RestaurantService restaurantService;
 
   private MeterRegistry meterRegistry;
+
+  private ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public Order createOrder(@NonNull CreateOrderRequest request) {
@@ -71,16 +75,12 @@ public class OrderService {
 
     log.info("order created: {}", order);
 
-    // create ticket
-    var ticketId = restaurantService.createTicket(
-        CreateTicketRequest.builder()
-            .customerId(order.getCustomerId())
-            .restaurantId(order.getRestaurantId())
-            .lineItems(request.getLineItems())
-            .build()
-    );
-
-    log.info("ticket created: {}", ticketId);
+    eventPublisher.publishEvent(OrderCreated.builder()
+        .orderId(order.getId())
+        .customerId(order.getCustomerId())
+        .restaurantId(order.getRestaurantId())
+        .lineItems(request.getLineItems())
+        .build());
 
     return order;
   }

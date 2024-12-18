@@ -5,6 +5,8 @@ import com.restaurantapp.ndnhuy.orderservice.OrderNotFoundException;
 import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -65,5 +67,19 @@ public class RestaurantService {
                         .build())
                     .toList())
                 .build());
+  }
+
+  public TicketDto findTicketByOrderId(Long orderId) {
+    return ticketRepository.findByOrderId(orderId)
+        .map(ticket -> TicketDto.builder()
+            .id(ticket.getId())
+            .customerId(ticket.getCustomerId())
+            .orderId(ticket.getOrderId())
+            .restaurantId(ticket.getRestaurantId())
+            .status(ticket.getStatus())
+            .customerId(ticket.getCustomerId())
+            .lineItems(ticket.getLineItems())
+            .build())
+        .orElseThrow(() -> new TicketNotFound(orderId));
   }
 }

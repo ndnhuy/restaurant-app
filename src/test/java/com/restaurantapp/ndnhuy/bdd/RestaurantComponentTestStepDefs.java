@@ -8,6 +8,7 @@ import com.restaurantapp.ndnhuy.paymentservice.CreatePaymentOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.AcceptOrderRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
+import com.restaurantapp.ndnhuy.restaurantservice.TicketStatus;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -177,6 +178,17 @@ public class RestaurantComponentTestStepDefs {
         .then()
         .statusCode(200)
         .body("amount", equalTo(expectedAmount));
+  }
+
+  @And("a ticket is created")
+  public void aTicketIsCreated() {
+    given()
+        .when()
+        .get(baseUrl(String.format("/restaurants/ticket/order/%d", testData.orderId)))
+        .prettyPeek()
+        .then()
+        .statusCode(200)
+        .body("status", equalTo(TicketStatus.CREATED.toString()));
   }
 
 
