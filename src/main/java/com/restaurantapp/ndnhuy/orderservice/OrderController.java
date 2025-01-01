@@ -64,6 +64,7 @@ public class OrderController {
         .customerId(order.getCustomerId())
         .status(order.getStatus())
         .amount(order.getAmount())
+        .restaurantId(order.getRestaurantId())
         .build();
   }
 

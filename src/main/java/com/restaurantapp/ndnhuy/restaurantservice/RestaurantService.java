@@ -1,20 +1,22 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
+import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
 import com.restaurantapp.ndnhuy.orderservice.Order;
 import com.restaurantapp.ndnhuy.orderservice.OrderNotFoundException;
 import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
@@ -23,24 +25,34 @@ public class RestaurantService {
 
   private final TicketRepository ticketRepository;
 
+  private final ApplicationEventPublisher eventPublisher;
+
   public Restaurant createRestaurant(String name, List<MenuItem> menuItems) {
     return restaurantRepository.save(Restaurant.builder().name(name).menuItems(menuItems).build());
   }
 
+  @Transactional
   public void acceptOrder(Long orderId) {
-    orderService.findOrder(orderId)
-        .map(Order::accepted)
-        .ifPresentOrElse(orderService::save, () -> {
-          throw new OrderNotFoundException(orderId);
-        });
+    var ticket = ticketRepository.findByOrderId(orderId)
+        .map(Ticket::accepted)
+        .orElseThrow(() -> new TicketNotFoundException(orderId));
+
+    ticketRepository.save(ticket);
+
+    log.info("ticket accepted: {}", ticket.getId());
+
+    eventPublisher.publishEvent(TicketAcceptedEvent.builder()
+        .ticketId(ticket.getId())
+        .orderId(ticket.getOrderId())
+        .build());
   }
 
   public List<MenuItem> findMenuItems(List<Long> ids) {
     return restaurantRepository.findMenuItemsIn(ids);
   }
 
-  public Long createTicket(CreateTicketRequest request) {
-    var ticket = ticketRepository.save(Ticket.builder()
+  public Ticket createTicket(CreateTicketRequest request) {
+    return ticketRepository.save(Ticket.builder()
         .restaurantId(request.getRestaurantId())
         .customerId(request.getCustomerId())
         .orderId(request.getOrderId())
@@ -51,7 +63,6 @@ public class RestaurantService {
                 .build())
             .toList())
         .build());
-    return ticket.getId();
   }
 
   public Optional<RestaurantDTO> getRestaurantById(long id) {
@@ -80,6 +91,6 @@ public class RestaurantService {
             .customerId(ticket.getCustomerId())
             .lineItems(ticket.getLineItems())
             .build())
-        .orElseThrow(() -> new TicketNotFound(orderId));
+        .orElseThrow(() -> new TicketNotFoundException(orderId));
   }
 }

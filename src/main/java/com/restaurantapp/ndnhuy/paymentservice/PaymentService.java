@@ -15,7 +15,7 @@ public class PaymentService {
 
   private final OrderService orderService;
 
-  private PaymentOrder createOrder(Order order) {
+  private PaymentOrder createPaymentOrder(Order order) {
     var pmtOrder = PaymentOrder.builder()
         .orderId(order.getId())
         .customerId(order.getCustomerId())
@@ -29,7 +29,7 @@ public class PaymentService {
   public PaymentOrder createAndPay(Long orderId) {
     log.info("create and pay order {}", orderId);
     var order = orderService.findOrder(orderId).orElseThrow(() -> new PaymentExecption("order not found"));
-    var pmtOrder = createOrder(order);
+    var pmtOrder = createPaymentOrder(order);
 
     pay(pmtOrder.getId());
 

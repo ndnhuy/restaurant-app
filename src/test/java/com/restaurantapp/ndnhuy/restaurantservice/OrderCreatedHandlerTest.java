@@ -2,7 +2,7 @@ package com.restaurantapp.ndnhuy.restaurantservice;
 
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
-import com.restaurantapp.ndnhuy.common.events.OrderCreated;
+import com.restaurantapp.ndnhuy.common.events.OrderCreatedEvent;
 import com.restaurantapp.ndnhuy.utils.RandomUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -31,7 +30,7 @@ class OrderCreatedHandlerTest {
   @Test
   void testOrderCreatedHandler() {
     var orderId = RandomUtils.randomPositiveLong();
-    orderCreatedHandler.on(OrderCreated.builder()
+    orderCreatedHandler.on(OrderCreatedEvent.builder()
         .orderId(orderId)
         .restaurantId(RandomUtils.randomPositiveLong())
         .customerId(RandomUtils.randomPositiveLong())

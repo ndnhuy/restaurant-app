@@ -1,7 +1,7 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
-import com.restaurantapp.ndnhuy.common.events.OrderCreated;
+import com.restaurantapp.ndnhuy.common.events.OrderCreatedEvent;
 import com.restaurantapp.ndnhuy.restaurantservice.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -75,7 +75,7 @@ public class OrderService {
 
     log.info("order created: {}", order);
 
-    eventPublisher.publishEvent(OrderCreated.builder()
+    eventPublisher.publishEvent(OrderCreatedEvent.builder()
         .orderId(order.getId())
         .customerId(order.getCustomerId())
         .restaurantId(order.getRestaurantId())

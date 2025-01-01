@@ -1,7 +1,6 @@
 package com.restaurantapp.ndnhuy.common.events;
 
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
-import com.restaurantapp.ndnhuy.restaurantservice.TicketLineItem;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 @ToString
-public class OrderCreated {
+public class OrderCreatedEvent {
 
   private final Long orderId;
 

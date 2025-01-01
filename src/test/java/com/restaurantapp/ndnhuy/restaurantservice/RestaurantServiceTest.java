@@ -57,8 +57,9 @@ public class RestaurantServiceTest {
                 .quantity(5)
                 .build())
             .toList())
-        .build());
+        .build()).getId();
 
+    // then
     var ticket = ticketRepository.findById(ticketId);
     assertThat(ticket.get().getRestaurantId()).isEqualTo(restaurant.getId());
     assertThat(ticket.get().getCustomerId()).isEqualTo(1L);

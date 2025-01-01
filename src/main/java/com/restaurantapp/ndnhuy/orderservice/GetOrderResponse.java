@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class GetOrderResponse {
   private Long id;
   private Long customerId;
+  private Long restaurantId;
   private OrderStatus status;
   private BigDecimal amount;
 }

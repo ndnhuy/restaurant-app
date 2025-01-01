@@ -1,6 +1,9 @@
-package com.restaurantapp.ndnhuy.restaurantservice;
+package com.restaurantapp.ndnhuy.orderservice;
 
 import com.restaurantapp.ndnhuy.common.events.OrderCreatedEvent;
+import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
+import com.restaurantapp.ndnhuy.restaurantservice.CreateTicketRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,24 +15,22 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderCreatedHandler {
+public class TicketAcceptedEventHandler {
 
-  private final RestaurantService restaurantService;
+  private final OrderService orderService;
 
   //  @Async
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  void on(OrderCreatedEvent event) {
+  void on(TicketAcceptedEvent event) {
     log.info("handle event: {}", event);
-    var ticket = restaurantService.createTicket(
-        CreateTicketRequest.builder()
-            .orderId(event.getOrderId())
-            .customerId(event.getCustomerId())
-            .restaurantId(event.getRestaurantId())
-            .lineItems(event.getLineItems())
-            .build()
-    );
 
-    log.info("ticket created: {}", ticket);
+    var order = orderService.findOrder(event.getOrderId())
+        .map(Order::accepted)
+        .orElseThrow(() -> new OrderNotFoundException(event.getOrderId()));
+
+    orderService.save(order);
+
+    log.info("order accepted: {}", order);
   }
 }

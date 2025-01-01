@@ -31,4 +31,9 @@ public class Ticket {
   @CollectionTable(name = "ticket_line_items", joinColumns = {@JoinColumn(name = "ticketId")})
   private List<TicketLineItem> lineItems;
 
+  public Ticket accepted() {
+    this.status = TicketStatus.ACCEPTED;
+    return this;
+  }
+
 }

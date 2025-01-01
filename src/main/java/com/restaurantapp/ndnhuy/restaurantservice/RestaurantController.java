@@ -60,18 +60,6 @@ public class RestaurantController {
             .build())
         .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    // return service
-    // .getRestaurantById(id)
-    // .map(r ->
-    // GetRestaurantResponse
-    // .builder()
-    // .id(r.getId())
-    // .name(r.getName())
-    // .menuItems(r.getMenuItems())
-    // .build()
-    // )
-    // .map(resp -> new ResponseEntity<>(resp, HttpStatus.OK))
-    // .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @ExceptionHandler(exception = {OrderNotFoundException.class})

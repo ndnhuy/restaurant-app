@@ -5,21 +5,34 @@ import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.OrderHelper;
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
-import com.restaurantapp.ndnhuy.orderservice.OrderStatus;
+import com.restaurantapp.ndnhuy.common.TestFactory;
+import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
+import com.restaurantapp.ndnhuy.common.mocks.MockEventPublisher;
 import com.restaurantapp.ndnhuy.utils.RandomUtils;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import({TestcontainersConfiguration.class})
+@Import({TestcontainersConfiguration.class, TestFactory.class})
 @ActiveProfiles("test")
 public class RestaurantControllerTest {
 
@@ -41,10 +54,16 @@ public class RestaurantControllerTest {
   private RestaurantRepository restaurantRepository;
 
   @Autowired
+  private TicketRepository ticketRepository;
+
+  @Autowired
   private RestaurantHelper restaurantHelper;
 
   @Autowired
   private OrderHelper orderHelper;
+
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
 
   @Test
   @SneakyThrows
@@ -95,31 +114,30 @@ public class RestaurantControllerTest {
   @Test
   @SneakyThrows
   public void testAcceptOrder() {
-    // given a restaurant
-    var rid = restaurantHelper.getResourceId(
-        restaurantHelper.createResource(
-            restaurantHelper.givenValidCreationRequest(),
-            rs -> rs.andExpect(status().isOk())
-                .andExpect(jsonPath("id").isNotEmpty()),
-            restaurantHelper::getReponseAsJson
-        )
-    );
-
     // given an order
     var orderId = orderHelper.givenValidOrderId();
+    var givenOrder = orderHelper.fetchOrderById(orderId);
 
     // when restaurant accepts the order
     restaurantHelper.acceptOrder(orderId)
         .andExpect(status().isOk());
 
     // then the ticket is created with correct menu items and amount
+    var ticket = ticketRepository.findByOrderId(orderId);
+    assertThat(ticket.get().getOrderId()).isEqualTo(orderId);
+    assertThat(ticket.get().getRestaurantId()).isEqualTo(givenOrder.getRestaurantId());
+    assertThat(ticket.get().getCustomerId()).isEqualTo(givenOrder.getCustomerId());
+    assertThat(ticket.get().getLineItems()).isNotEmpty();
 
-    // order should be accepted
-    orderHelper.getResourceById(
-        orderId,
-        rs -> rs.andExpect(status().isOk())
-            .andExpect(jsonPath("status").value(OrderStatus.ACCEPTED.toString()))
-    );
+    // should publish event
+    var mockedEventPublisher = (MockEventPublisher) eventPublisher;
+    mockedEventPublisher.assertEventsPublished(
+        e -> e instanceof TicketAcceptedEvent,
+        e -> {
+          var event = (TicketAcceptedEvent) e;
+          assertThat(event.getTicketId()).isEqualTo(ticket.get().getId());
+          assertThat(event.getOrderId()).isEqualTo(orderId);
+        });
   }
 
   @Transactional
@@ -140,11 +158,4 @@ public class RestaurantControllerTest {
         .isEqualTo(expectMenuItem2.getPrice());
   }
 
-  public static String asJsonString(final Object obj) {
-    try {
-      return new ObjectMapper().writeValueAsString(obj);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }
