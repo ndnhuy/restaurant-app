@@ -1,6 +1,5 @@
 package com.restaurantapp.ndnhuy.common.mocks;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 

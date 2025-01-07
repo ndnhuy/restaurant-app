@@ -1,5 +1,6 @@
 package com.restaurantapp.ndnhuy.orderservice;
 
+import com.restaurantapp.ndnhuy.restaurantservice.RestaurantService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import java.util.Optional;
 public class OrderController {
 
   private OrderService orderService;
+
+  private RestaurantService restaurantService;
 
   @PostMapping
   public CreateOrderResponse createOrder(@RequestBody CreateOrderRequest req) {
@@ -65,6 +68,17 @@ public class OrderController {
         .status(order.getStatus())
         .amount(order.getAmount())
         .restaurantId(order.getRestaurantId())
+        .orderLineItems(
+            restaurantService.findTicketByOrderId(order.getId())
+                .getLineItems()
+                .stream()
+                .map(lineItem -> OrderLineItem.builder()
+                    .menuItemId(lineItem.getMenuItem().getId())
+                    .name(lineItem.getMenuItem().getName())
+                    .price(lineItem.getMenuItem().getPrice())
+                    .quantity(lineItem.getQuantity())
+                    .build())
+                .toList())
         .build();
   }
 

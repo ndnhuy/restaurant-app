@@ -1,9 +1,7 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
+import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
-import com.restaurantapp.ndnhuy.orderservice.Order;
-import com.restaurantapp.ndnhuy.orderservice.OrderNotFoundException;
-import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +20,6 @@ import java.util.Optional;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
-
-  private final OrderService orderService;
 
   private final TicketRepository ticketRepository;
 
@@ -51,17 +49,30 @@ public class RestaurantService {
     return restaurantRepository.findMenuItemsIn(ids);
   }
 
+//  public List<MenuItem> findMenuItemsByOrderId(Long orderId) {
+//    ticketRepository.findByOrderId(orderId).map(Ticket::getLineItems)
+//        .orElseThrow(() -> new OrderNotFoundException(orderId))
+//        .stream()
+//        .map(line -> MenuItem.builder()
+//            .build());
+//  }
+
+  @Transactional
   public Ticket createTicket(CreateTicketRequest request) {
+    var menuEntityById = restaurantRepository.findMenuItemsIn(request.getLineItems().stream().map(RequestLineItem::getMenuItemId).toList())
+        .stream().collect(Collectors.toMap(MenuItem::getId, Function.identity()));
     return ticketRepository.save(Ticket.builder()
         .restaurantId(request.getRestaurantId())
         .customerId(request.getCustomerId())
         .orderId(request.getOrderId())
         .status(TicketStatus.CREATED)
-        .lineItems(request.getLineItems().stream().map(item -> TicketLineItem.builder()
-                .menuItemId(item.getMenuItemId())
-                .quantity(item.getQuantity())
-                .build())
-            .toList())
+        .lineItems(
+            request.getLineItems().stream()
+                .map(item -> TicketLineItem.builder()
+                    .menuItem(menuEntityById.get(item.getMenuItemId()))
+                    .quantity(item.getQuantity())
+                    .build())
+                .toList())
         .build());
   }
 
@@ -81,6 +92,7 @@ public class RestaurantService {
   }
 
   public TicketDto findTicketByOrderId(Long orderId) {
+    log.info("find ticket by orderId {}", orderId);
     return ticketRepository.findByOrderId(orderId)
         .map(ticket -> TicketDto.builder()
             .id(ticket.getId())

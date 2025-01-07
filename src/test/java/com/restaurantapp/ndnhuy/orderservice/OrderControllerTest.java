@@ -71,9 +71,9 @@ public class OrderControllerTest {
     Consumer<ResultActions> assertMenuItems = rs -> {
       for (var i = 0; i < request.getLineItems().size(); i++) {
         var wantMenu = request.getLineItems().get(i);
-        BiFunction<Integer, String, String> path = (index, name) -> String.format("menuItems[%d].%s", index, name);
+        BiFunction<Integer, String, String> path = (index, name) -> String.format("orderLineItems[%d].%s", index, name);
         try {
-          rs.andExpect(jsonPath(path.apply(i, "id")).value(wantMenu.getMenuItemId()))
+          rs.andExpect(jsonPath(path.apply(i, "menuItemId")).value(wantMenu.getMenuItemId()))
               .andExpect(jsonPath(path.apply(i, "quantity")).value(wantMenu.getQuantity()));
         } catch (Exception e) {
           throw new RuntimeException(e);
