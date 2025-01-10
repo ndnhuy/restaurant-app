@@ -1,6 +1,6 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
-import com.restaurantapp.ndnhuy.common.events.OrderCreatedEvent;
+import com.restaurantapp.ndnhuy.common.events.OrderWasCreated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class OrderCreatedHandler {
   //  @Async
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  void on(OrderCreatedEvent event) {
+  void on(OrderWasCreated event) {
     log.info("handle event: {}", event);
     var ticket = restaurantService.createTicket(
         CreateTicketRequest.builder()

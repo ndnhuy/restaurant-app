@@ -1,34 +1,24 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
 import com.restaurantapp.ndnhuy.common.OrderHelper;
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.common.RestaurantHelper;
 import com.restaurantapp.ndnhuy.common.TestFactory;
-import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
+import com.restaurantapp.ndnhuy.common.events.TicketWasAccepted;
 import com.restaurantapp.ndnhuy.common.mocks.MockEventPublisher;
 import com.restaurantapp.ndnhuy.utils.RandomUtils;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,9 +122,9 @@ public class RestaurantControllerTest {
     // should publish event
     var mockedEventPublisher = (MockEventPublisher) eventPublisher;
     mockedEventPublisher.assertEventsPublished(
-        e -> e instanceof TicketAcceptedEvent,
+        e -> e instanceof TicketWasAccepted,
         e -> {
-          var event = (TicketAcceptedEvent) e;
+          var event = (TicketWasAccepted) e;
           assertThat(event.getTicketId()).isEqualTo(ticket.get().getId());
           assertThat(event.getOrderId()).isEqualTo(orderId);
         });

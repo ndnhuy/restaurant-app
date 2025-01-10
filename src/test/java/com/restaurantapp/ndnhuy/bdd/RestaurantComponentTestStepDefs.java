@@ -5,7 +5,7 @@ import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
 import com.restaurantapp.ndnhuy.paymentservice.CreatePaymentOrderRequest;
-import com.restaurantapp.ndnhuy.restaurantservice.AcceptOrderRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.TicketAcceptRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import com.restaurantapp.ndnhuy.restaurantservice.TicketStatus;
@@ -213,7 +213,7 @@ public class RestaurantComponentTestStepDefs {
         .when()
         .contentType(CONTENT_TYPE)
         .body(
-            AcceptOrderRequest.builder()
+            TicketAcceptRequest.builder()
                 .orderId(testData.getOrderId())
                 .build()
         )

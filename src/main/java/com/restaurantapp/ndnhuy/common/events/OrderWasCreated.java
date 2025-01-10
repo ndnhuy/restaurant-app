@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 @ToString
-public class OrderCreatedEvent {
+public class OrderWasCreated implements DomainEvent {
 
   private final Long orderId;
 

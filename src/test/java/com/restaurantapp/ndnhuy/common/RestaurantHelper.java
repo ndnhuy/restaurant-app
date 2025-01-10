@@ -1,6 +1,6 @@
 package com.restaurantapp.ndnhuy.common;
 
-import com.restaurantapp.ndnhuy.restaurantservice.AcceptOrderRequest;
+import com.restaurantapp.ndnhuy.restaurantservice.TicketAcceptRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import lombok.RequiredArgsConstructor;
@@ -95,7 +95,7 @@ public class RestaurantHelper implements EntityTestSupport<CreateRestaurantReque
     return this.mockMvc.perform(
             post("/restaurants/accept")
                 .contentType("application/json")
-                .content(asJsonString(AcceptOrderRequest.builder()
+                .content(asJsonString(TicketAcceptRequest.builder()
                     .orderId(orderId)
                     .build()))
         )

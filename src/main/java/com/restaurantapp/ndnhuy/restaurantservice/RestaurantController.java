@@ -1,15 +1,12 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
-import com.restaurantapp.ndnhuy.orderservice.*;
+import com.restaurantapp.ndnhuy.common.OrderNotFoundException;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
@@ -33,9 +30,9 @@ public class RestaurantController {
   }
 
   @PostMapping("/accept")
-  public void acceptOrder(@Valid @RequestBody AcceptOrderRequest acceptOrderRequest) {
-    log.info("accept order: {}", acceptOrderRequest);
-    service.acceptOrder(acceptOrderRequest.getOrderId());
+  public void acceptOrder(@Valid @RequestBody TicketAcceptRequest ticketAcceptRequest) {
+    log.info("kitchen accept ticket: {}", ticketAcceptRequest);
+    service.acceptTicketOfOrder(ticketAcceptRequest.getOrderId());
   }
 
   @GetMapping(path = "/{id}")

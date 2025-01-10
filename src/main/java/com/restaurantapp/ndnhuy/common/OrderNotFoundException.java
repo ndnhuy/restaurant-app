@@ -1,4 +1,4 @@
-package com.restaurantapp.ndnhuy.orderservice;
+package com.restaurantapp.ndnhuy.common;
 
 public class OrderNotFoundException extends RuntimeException {
 

@@ -1,7 +1,7 @@
 package com.restaurantapp.ndnhuy.restaurantservice;
 
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
-import com.restaurantapp.ndnhuy.common.events.TicketAcceptedEvent;
+import com.restaurantapp.ndnhuy.common.events.TicketWasAccepted;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantDTO.MenuItemDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class RestaurantService {
   }
 
   @Transactional
-  public void acceptOrder(Long orderId) {
+  public void acceptTicketOfOrder(Long orderId) {
     var ticket = ticketRepository.findByOrderId(orderId)
         .map(Ticket::accepted)
         .orElseThrow(() -> new TicketNotFoundException(orderId));
@@ -39,7 +39,7 @@ public class RestaurantService {
 
     log.info("ticket accepted: {}", ticket.getId());
 
-    eventPublisher.publishEvent(TicketAcceptedEvent.builder()
+    eventPublisher.publishEvent(TicketWasAccepted.builder()
         .ticketId(ticket.getId())
         .orderId(ticket.getOrderId())
         .build());
