@@ -1,13 +1,14 @@
 package com.restaurantapp.ndnhuy.bdd;
 
 import com.restaurantapp.ndnhuy.TestcontainersConfiguration;
-import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
-import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.common.RequestLineItem;
+import com.restaurantapp.ndnhuy.customerservice.CreateCustomerRequest;
+import com.restaurantapp.ndnhuy.deliveryservice.GetDeliveryResponse;
+import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.paymentservice.CreatePaymentOrderRequest;
-import com.restaurantapp.ndnhuy.restaurantservice.TicketAcceptRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.CreateRestaurantRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
+import com.restaurantapp.ndnhuy.restaurantservice.TicketAcceptRequest;
 import com.restaurantapp.ndnhuy.restaurantservice.TicketStatus;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -224,7 +225,18 @@ public class RestaurantComponentTestStepDefs {
 
   @And("Order is assigned to a shipper")
   public void orderIsAssignedToShipper() {
+    //TODO find delivery by order id, then check if assignedCourierId is not null
+    var delivery = given()
+        .when()
+        .get(baseUrl("/delivery/order/" + testData.getOrderId()))
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject(".", GetDeliveryResponse.class);
 
+    assertNotNull(delivery.getAssignedCourierId());
   }
 
 }

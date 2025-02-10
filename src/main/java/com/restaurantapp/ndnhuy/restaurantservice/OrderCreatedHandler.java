@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
+@Component("restaurantOrderCreatedHandler")
 public class OrderCreatedHandler {
 
   private final RestaurantService restaurantService;

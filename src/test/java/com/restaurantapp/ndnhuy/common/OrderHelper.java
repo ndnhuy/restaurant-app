@@ -2,6 +2,8 @@ package com.restaurantapp.ndnhuy.common;
 
 import com.restaurantapp.ndnhuy.orderservice.CreateOrderRequest;
 import com.restaurantapp.ndnhuy.orderservice.GetOrderResponse;
+import com.restaurantapp.ndnhuy.orderservice.Order;
+import com.restaurantapp.ndnhuy.orderservice.OrderService;
 import com.restaurantapp.ndnhuy.restaurantservice.MenuItem;
 import com.restaurantapp.ndnhuy.restaurantservice.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +47,15 @@ public class OrderHelper implements EntityTestSupport<CreateOrderRequest, Long> 
   @Autowired
   private RestaurantRepository restaurantRepository;
 
+  @Autowired
+  private OrderService orderService;
+
   public Long givenValidOrderId() {
     return getResourceId(givenValidResource());
+  }
+
+  public Order getOrder(Long orderId) {
+    return orderService.findOrder(orderId).get();
   }
 
   @SneakyThrows

@@ -7,7 +7,7 @@ public enum OrderStatus {
   CREATED,
   // order is paid
   PAID,
-  // order is accepted by restaurant
+  // order is accepted by restaurant and scheduled for delivery
   ACCEPTED,
   // order is rejected by restaurant or no drivers found
   REJECTED,
